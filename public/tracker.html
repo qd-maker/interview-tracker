@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>面试备考追踪器</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap");
+
+      :root {
+        color-scheme: light;
+        --bg: #f3f0e8;
+        --bg-grid: rgba(18, 20, 23, 0.035);
+        --panel: #fffdf8;
+        --panel-soft: #f8f5ee;
+        --line: #d7d1c3;
+        --line-strong: #c6bead;
+        --text: #121417;
+        --text-soft: #66717f;
+        --brand: #1456ff;
+        --brand-soft: rgba(20, 86, 255, 0.1);
+        --ok: #0f9a72;
+        --ok-soft: rgba(15, 154, 114, 0.12);
+        --warn: #ef7f2d;
+        --radius: 24px;
+        --shadow: 0 24px 64px rgba(18, 20, 23, 0.08);
+        --shadow-soft: 0 10px 24px rgba(18, 20, 23, 0.05);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background:
+          linear-gradient(var(--bg-grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+          linear-gradient(180deg, #f7f4ed 0%, var(--bg) 100%);
+        background-size: 24px 24px, 24px 24px, auto;
+        color: var(--text);
+      }
+
+      button, input { font: inherit; }
+
+      .shell { width: min(1200px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 80px; }
+      .hero {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,245,238,.94));
+        box-shadow: var(--shadow);
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: rgba(20, 86, 255, 0.04);
+        font-size: 12px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+      }
+      h1 {
+        margin: 16px 0 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        font-size: clamp(34px,5vw,60px);
+        line-height: 1.02;
+        letter-spacing: -.05em;
+      }
+      .hero p { margin: 16px 0 0; max-width: 60ch; line-height: 1.8; color: var(--text-soft); }
+      .hero-panel { display: grid; gap: 14px; }
+      .panel-card {
+        padding: 18px 18px 20px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--panel);
+        box-shadow: var(--shadow-soft);
+      }
+      .panel-label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-soft); }
+      .panel-value { margin-top: 8px; font-size: 34px; font-weight: 700; letter-spacing: -.04em; }
+      .progress-track { width: 100%; height: 10px; margin-top: 14px; border-radius: 999px; background: #ebe6db; overflow: hidden; }
+      .progress-bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--brand), #2f82ff); }
+      .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+      .control-button, .remember-button, .phase-chip {
+        border: 1px solid var(--line-strong);
+        background: rgba(255,255,255,.8);
+        color: var(--text);
+      }
+      .control-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: 180ms ease;
+        box-shadow: var(--shadow-soft);
+      }
+      .control-button:hover, .phase-chip:hover, .remember-button:hover { border-color: #a59b86; background: #ffffff; }
+      .control-button.active { border-color: rgba(20,86,255,.24); background: var(--brand-soft); color: var(--brand); }
+      .summary-strip {
+        position: relative;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 22px;
+        padding: 10px 0 0;
+      }
+      .summary-strip::before {
+        content: "";
+        position: absolute;
+        left: 12%;
+        right: 12%;
+        top: 36px;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(18,20,23,.12), rgba(20,86,255,.26), rgba(18,20,23,.12));
+      }
+      .phase-chip {
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        border-radius: 22px;
+        text-align: left;
+        cursor: pointer;
+        transition: 180ms ease;
+      }
+      .phase-chip-shell {
+        padding: 0 14px 18px;
+        border-radius: 24px;
+        border: 1px solid transparent;
+        background: transparent;
+        transition: 180ms ease;
+      }
+      .phase-chip:hover .phase-chip-shell {
+        border-color: var(--line);
+        background: rgba(255,255,255,.58);
+      }
+      .phase-chip-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .phase-chip-marker {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 14px;
+        border-radius: 18px;
+        border: 1px solid var(--line-strong);
+        background: var(--panel);
+        color: var(--text-soft);
+        font-weight: 700;
+        box-shadow: 0 0 0 8px var(--bg);
+      }
+      .phase-chip-step { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-soft); }
+      .phase-chip-title { margin-top: 10px; font-size: 18px; line-height: 1.4; }
+      .phase-chip-meta { margin-top: 12px; font-size: 13px; color: var(--text-soft); }
+      .phase-chip.is-current .phase-chip-shell {
+        border-color: color-mix(in srgb, var(--stage-accent, var(--brand)) 24%, white);
+        background: color-mix(in srgb, var(--stage-accent, var(--brand)) 8%, white);
+      }
+      .phase-chip.is-current .phase-chip-marker {
+        border-color: color-mix(in srgb, var(--stage-accent, var(--brand)) 35%, white);
+        background: color-mix(in srgb, var(--stage-accent, var(--brand)) 10%, white);
+        color: var(--stage-accent, var(--brand));
+      }
+      .phase-chip.is-complete .phase-chip-marker {
+        border-color: rgba(107,226,183,.28);
+        background: var(--ok-soft);
+        color: var(--ok);
+      }
+      .roadmap {
+        position: relative;
+        display: grid;
+        gap: 22px;
+        margin-top: 28px;
+        padding-left: 74px;
+      }
+      .roadmap::before {
+        content: "";
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, rgba(18,20,23,.22), rgba(18,20,23,.1), rgba(18,20,23,.22));
+      }
+      .phase {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--panel);
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+      }
+      .phase::after {
+        content: "";
+        position: absolute;
+        left: -58px;
+        top: 36px;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        border: 2px solid color-mix(in srgb, var(--stage-accent, var(--brand)) 35%, white);
+        background: var(--panel);
+        box-shadow: 0 0 0 10px var(--bg);
+      }
+      .phase::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0;
+        width: 4px; height: 100%;
+        background: linear-gradient(180deg, var(--stage-accent, var(--brand)), color-mix(in srgb, var(--stage-accent, var(--brand)) 65%, white));
+      }
+      .phase.is-current {
+        border-color: color-mix(in srgb, var(--stage-accent, var(--brand)) 22%, white);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--stage-accent, var(--brand)) 12%, white), 0 18px 44px rgba(18,20,23,.09);
+      }
+      .phase.is-current::after {
+        border-color: color-mix(in srgb, var(--stage-accent, var(--brand)) 50%, white);
+        background: var(--stage-accent, var(--brand));
+      }
+      .phase.is-complete {
+        border-color: rgba(107,226,183,.2);
+      }
+      .phase.is-complete::after {
+        border-color: rgba(107,226,183,.55);
+        background: var(--ok);
+      }
+      .phase-header {
+        display: grid;
+        grid-template-columns: auto minmax(0,1fr) auto;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        padding: 22px 24px 22px 26px;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+      }
+      .phase-number {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 18px;
+        background: color-mix(in srgb, var(--stage-accent, var(--brand)) 10%, white);
+        color: var(--stage-accent, var(--brand));
+        font-weight: 700;
+      }
+      .phase-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .phase-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text-soft);
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .phase-badge.status-current {
+        border-color: color-mix(in srgb, var(--stage-accent, var(--brand)) 22%, white);
+        background: color-mix(in srgb, var(--stage-accent, var(--brand)) 10%, white);
+        color: var(--stage-accent, var(--brand));
+      }
+      .phase-badge.status-complete {
+        border-color: rgba(107,226,183,.24);
+        background: var(--ok-soft);
+        color: var(--ok);
+      }
+      .phase-badge.status-pending {
+        border-color: var(--line-strong);
+      }
+      .phase-title {
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        font-size: clamp(22px,2vw,30px);
+        line-height: 1.12;
+        letter-spacing: -.04em;
+      }
+      .phase-subtitle { margin-top: 8px; max-width: 62ch; font-size: 14px; line-height: 1.75; color: var(--text-soft); }
+      .phase-status { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 160px; }
+      .phase-status strong { font-size: 18px; }
+      .phase-status span { font-size: 13px; color: var(--text-soft); }
+      .phase-body { display: grid; gap: 18px; padding: 0 24px 24px 26px; }
+      .stage-intro, .qa-card, .footer-note {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--panel-soft);
+      }
+      .stage-intro {
+        padding: 18px 20px;
+        background: linear-gradient(180deg, rgba(20,86,255,.04), rgba(255,253,248,.92));
+      }
+      .stage-intro p, .stage-intro li, .qa-content p, .qa-content li {
+        margin: 0;
+        line-height: 1.9;
+        color: var(--text);
+      }
+      .stage-intro p + p, .qa-content p + p { margin-top: 12px; }
+      .stage-intro ul, .qa-content ul { margin: 12px 0 0; padding-left: 1.2rem; }
+      .stage-intro li + li, .qa-content li + li { margin-top: 8px; }
+      .qa-list { display: grid; gap: 14px; }
+      .qa-card {
+        padding: 18px 18px 18px 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,245,238,.96));
+        transition: 180ms ease;
+      }
+      .qa-card.remembered {
+        border-color: rgba(15,154,114,.24);
+        background: linear-gradient(180deg, rgba(15,154,114,.08), rgba(255,255,255,.68));
+      }
+      .qa-head { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: start; }
+      .qa-index {
+        display: grid; place-items: center;
+        width: 36px; height: 36px;
+        border-radius: 14px;
+        background: rgba(18,20,23,.05);
+        color: var(--text-soft);
+        font-size: 13px; font-weight: 700;
+      }
+      .qa-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+      .qa-tag {
+        display: inline-flex; align-items: center;
+        min-height: 28px; padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(18,20,23,.05);
+        color: var(--text-soft);
+        font-size: 12px;
+      }
+      .qa-card.remembered .qa-tag.status { background: var(--ok-soft); color: var(--ok); }
+      .qa-title {
+        margin: 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        font-size: 22px;
+        line-height: 1.45;
+        letter-spacing: -.02em;
+        color: var(--text);
+      }
+      .remember-button {
+        min-width: 116px; min-height: 44px; padding: 0 14px;
+        border-radius: 16px; cursor: pointer; transition: 180ms ease;
+        box-shadow: none;
+      }
+      .remember-button.remembered { border-color: rgba(107,226,183,.26); background: var(--ok-soft); color: var(--ok); }
+      .qa-content {
+        margin-top: 16px;
+        padding-left: 50px;
+        color: var(--text);
+      }
+      .stage-intro strong, .qa-content strong, .footer-note strong {
+        color: var(--text);
+      }
+      .empty-stage {
+        padding: 18px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 20px;
+        color: var(--text-soft);
+      }
+      .footer-note {
+        margin-top: 28px;
+        padding: 18px 20px;
+        color: var(--text-soft);
+        line-height: 1.8;
+        background: rgba(255,255,255,.76);
+      }
+      @media (max-width: 980px) {
+        .hero { grid-template-columns: 1fr; }
+        .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .summary-strip::before { left: 18%; right: 18%; top: 36px; }
+        .roadmap { padding-left: 56px; }
+        .roadmap::before { left: 22px; }
+        .phase::after { left: -42px; }
+        .phase-header { grid-template-columns: auto minmax(0, 1fr); }
+        .phase-status { grid-column: 1 / -1; align-items: flex-start; margin-left: 64px; min-width: 0; }
+        .qa-head { grid-template-columns: auto minmax(0,1fr); }
+        .remember-button { grid-column: 2; justify-self: start; }
+        .qa-content { padding-left: 0; }
+      }
+      @media (max-width: 720px) {
+        .shell { width: min(100% - 20px, 1200px); padding-top: 18px; }
+        .hero, .phase-header, .phase-body { padding-left: 18px; padding-right: 18px; }
+        .summary-strip { grid-template-columns: 1fr; }
+        .summary-strip::before { display: none; }
+        .roadmap { padding-left: 0; }
+        .roadmap::before { display: none; }
+        .phase::after { display: none; }
+        .phase-title { font-size: 22px; }
+        .qa-title { font-size: 19px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <div class="eyebrow">Interview Prep Tracker</div>
+          <h1>面试备考追踪器</h1>
+          <p>按真实面试顺序推进：先开场，再讲项目，最后补通用追问和收尾。每条内容只有两个状态：记住 / 未记住。</p>
+          <div class="controls">
+            <button class="control-button" data-action="focus-current">继续当前阶段</button>
+            <button class="control-button" data-action="toggle-hide">隐藏已记住</button>
+            <button class="control-button" data-action="toggle-expand">展开 / 收起全部</button>
+            <button class="control-button" data-action="reset">清空记忆状态</button>
+          </div>
+        </div>
+        <div class="hero-panel" id="heroPanel"></div>
+      </header>
+      <section class="summary-strip" id="summaryStrip"></section>
+      <main class="roadmap" id="roadmap"></main>
+      <div class="footer-note">只有两种状态：<strong>记住</strong> / <strong>未记住</strong>。不做假的熟练度评级，不做假的准备度推断。什么时候你真的记住了，就点一下。</div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "interview-roadmap-tracker/v1";
+      const STAGE_ACCENTS = ["#1456ff", "#0f9a72", "#ef7f2d", "#c13ec8"];
+      const ROADMAP = [
+        {
+          id: "opening",
+          step: "阶段 1 / 4",
+          title: "开场：自我介绍",
+          subtitle: "目标不是惊艳，而是让面试官愿意继续往下问。",
+          intro: `
+            <p>这个部分目标不是“惊艳”，而是让面试官快速知道：</p>
+            <ul>
+              <li>你是谁</li>
+              <li>你现在什么阶段</li>
+              <li>你想找什么岗位</li>
+              <li>你做过什么</li>
+              <li>你为什么值得继续问</li>
+            </ul>
+          `,
+          items: [
+            {
+              id: "opening-30s",
+              kind: "话术",
+              title: "30 秒自我介绍版",
+              html: `
+                <p>面试官您好，我叫端奇，现在是南京工业职业技术大学网络工程专业本科大二。</p>
+                <p>我目前主要在找 AI 应用开发、LLM 应用开发，或者全栈偏 AI 方向的实习。</p>
+                <p>最近我主要做了两个上线项目，一个是保险场景的 RAG 结构化信息提取系统，另一个是多模型协作式 AI 对话平台。</p>
+                <p>我比较关注的是把模型能力真正接到后端服务、数据库、前端交互和部署链路里，而不只是做一个调用模型的 Demo。</p>
+                <p>所以我希望找一份能让我继续补强 AI 应用落地和后端工程能力的实习。</p>
+              `,
+            },
+            {
+              id: "opening-1m",
+              kind: "话术",
+              title: "1 分钟自我介绍版",
+              html: `
+                <p>面试官您好，我叫端奇，现在是南京工业职业技术大学网络工程专业本科大二。</p>
+                <p>我目前想找的方向主要是 AI 应用开发、LLM 应用开发，或者全栈偏 AI 的实习岗位。</p>
+                <p>我最近主要在做两个项目。</p>
+                <p>第一个是保险场景的 RAG 信息提取系统，重点解决结构化输出、结果可追溯和检索可信度的问题；</p>
+                <p>第二个是多模型协作式 AI 对话平台，重点做后端服务化、SSE 流式交互和性能优化。</p>
+                <p>这两个项目都已经上线，我在里面不仅做了模型接入，也做了接口设计、数据库、评估、日志、健康检查和部署。</p>
+                <p>我比较关注的不是单点模型调用，而是怎么把模型能力变成一个真正可用、可验证、可迭代的系统。</p>
+                <p>所以我希望通过实习继续补强自己的工程能力，尤其是 AI 应用后端和全链路落地能力。</p>
+              `,
+            },
+            {
+              id: "opening-why-direction",
+              kind: "问答",
+              title: "如果面试官问：“你为什么投这个方向？”",
+              html: `
+                <p>因为我对“模型能力怎么真正变成产品能力”比较感兴趣。</p>
+                <p>我不太满足于只写 prompt 或只做聊天页面，我更想做的是把模型接进检索、后端服务、数据库、前端交互和部署流程里，形成完整的 AI 应用。</p>
+                <p>所以我现在会更主动地去做 RAG、多模型协作、流式接口和上线部署这类项目。</p>
+              `,
+            },
+          ],
+        },
+        {
+          id: "insurance-rag",
+          step: "阶段 2 / 4",
+          title: "项目一：insurance-rag",
+          subtitle: "这部分要打出“可信结果、结构化输出、字段引用、评估意识”的标签。",
+          intro: `
+            <p>这个项目你要打的标签是：</p>
+            <ul>
+              <li>RAG</li>
+              <li>结构化输出</li>
+              <li>可信结果</li>
+              <li>字段引用</li>
+              <li>后端接口</li>
+              <li>上线部署</li>
+              <li>评估意识</li>
+            </ul>
+          `,
+          items: [
+            {
+              id: "rag-one-line",
+              kind: "一句话",
+              title: "一句话介绍项目",
+              html: `
+                <p>这是一个保险场景下的 RAG 结构化信息提取系统，重点解决普通问答在高可信场景下容易出现幻觉、跨产品污染和结果不可验证的问题。</p>
+              `,
+            },
+            {
+              id: "rag-1m",
+              kind: "话术",
+              title: "1 分钟项目介绍版",
+              html: `
+                <p>我做的第一个项目是一个保险场景的 RAG 信息提取系统。</p>
+                <p>它不是普通聊天问答，而是用户选择某个保险产品后，系统返回结构化的产品信息，比如产品概览、核心保障、免责条款、适用人群等。</p>
+                <p>我做这个项目的原因是，保险场景对结果可信度要求比较高，如果直接做开放式问答，很容易出现模型编造和跨产品信息串扰。</p>
+                <p>所以我在项目里重点做了三件事：第一是混合检索，把产品约束、精确匹配和向量检索结合起来；第二是结构化抽取，把结果统一成固定字段；第三是字段级引用，让关键字段尽量绑定来源条款。</p>
+                <p>技术上主要用了 Next.js、TypeScript、Supabase、pgvector 和 OpenAI API，并补了缓存、日志、健康检查和线上部署。</p>
+                <p>目前这个项目已经上线，评估里字段完整率和引用覆盖率都是 87.5%，核心接口 P95 延迟是 3254ms。</p>
+              `,
+            },
+            {
+              id: "rag-role",
+              kind: "问答",
+              title: "如果问：“你在这个项目里具体做了什么？”",
+              html: `
+                <p>这个项目基本是我自己主导完成的。</p>
+                <p>我主要负责四块：</p>
+                <ul>
+                  <li>第一块是后端接口设计，包括搜索接口、产品列表接口、缓存管理和健康检查；</li>
+                  <li>第二块是 RAG 检索链路，做了产品约束、精确匹配和向量检索的组合；</li>
+                  <li>第三块是结构化输出，把模型结果收敛到固定字段，并尽量给字段绑定 sourceClauseId；</li>
+                  <li>第四块是工程化部分，包括日志、缓存、评估脚本和线上部署。</li>
+                </ul>
+              `,
+            },
+            {
+              id: "rag-structured",
+              kind: "问答",
+              title: "如果问：“这个项目为什么不做普通问答，而要做结构化提取？”",
+              html: `
+                <p>因为在保险场景里，能回答不等于能用。</p>
+                <p>如果只是普通问答，模型很容易给出一段看起来合理、但业务上不一定可靠的回答。</p>
+                <p>我更希望它输出的是结构化结果，比如产品概览、核心保障、免责条款、适用人群。</p>
+                <p>这样一方面前端更好展示，另一方面也更容易做字段校验和结果验证。</p>
+              `,
+            },
+            {
+              id: "rag-citation",
+              kind: "问答",
+              title: "如果问：“为什么要做字段级引用？”",
+              html: `
+                <p>因为这个项目最核心的问题是可信度。</p>
+                <p>如果只给一段总结，业务人员很难确认哪些内容真来自条款。</p>
+                <p>所以我尽量给关键字段绑定 sourceClauseId，让结果具备可追溯性。</p>
+                <p>这样可以减少“模型看起来会说，但没法验证”的问题。</p>
+              `,
+            },
+            {
+              id: "rag-retrieval",
+              kind: "问答",
+              title: "如果问：“为什么不用纯向量检索？”",
+              html: `
+                <p>因为保险产品文本之间相似度很高，纯向量检索容易召回相近但错误的产品内容。</p>
+                <p>所以我做的是混合检索：先加产品约束，再结合精确匹配和向量检索。</p>
+                <p>我的优先目标不是让它什么都能答，而是保证目标产品的一致性和结果可信度。</p>
+              `,
+            },
+            {
+              id: "rag-hard",
+              kind: "问答",
+              title: "如果问：“这个项目的难点是什么？”",
+              html: `
+                <p>最大的难点不是模型调用，而是怎么让结果更可信。</p>
+                <p>因为保险这个场景里，普通问答特别容易出现两类问题：一是模型编造条款；二是把 A 产品的信息串到 B 产品里。</p>
+                <p>所以我后来调整了思路，不把它做成自由问答，而是做成受输入约束的结构化提取系统。</p>
+              `,
+            },
+            {
+              id: "rag-eval",
+              kind: "问答",
+              title: "如果问：“你怎么评估这个项目？”",
+              html: `
+                <p>我主要做了两类评估。</p>
+                <p>第一类是输出质量评估，比如字段完整率和引用覆盖率，目前这两个指标都是 87.5%。</p>
+                <p>第二类是接口性能评估，比如核心接口的 P95 延迟，目前是 3254ms。</p>
+                <p>我比较重视通过指标来判断优化方向，而不是只靠主观感觉。</p>
+              `,
+            },
+            {
+              id: "rag-limits",
+              kind: "问答",
+              title: "如果问：“这个项目还有哪些不足？”",
+              html: `
+                <p>我觉得还有三点不足。</p>
+                <ul>
+                  <li>第一，评估集规模还不够大，现在的指标更多是验证方向正确。</li>
+                  <li>第二，检索质量还可以继续做更系统的 Top-k 命中率和跨产品污染率评估。</li>
+                  <li>第三，结构化抽取目前还比较依赖 prompt 和字段设计，后续还可以继续增强 schema 约束和 fallback 策略。</li>
+                </ul>
+                <p>所以我现在把它看成一个已经能跑通并上线的可用原型，但还有继续工程化和评测化的空间。</p>
+              `,
+            },
+            {
+              id: "rag-metrics",
+              kind: "指标",
+              title: "这个项目你要记死的指标",
+              html: `
+                <p>你必须张口就来：</p>
+                <ul>
+                  <li>字段完整率：87.5%</li>
+                  <li>引用覆盖率：87.5%</li>
+                  <li>核心接口 P95 延迟：3254ms</li>
+                </ul>
+              `,
+            },
+          ],
+        },
+        {
+          id: "quorum",
+          step: "阶段 3 / 4",
+          title: "项目二：Quorum",
+          subtitle: "这部分要体现后端服务化、SSE、持久化和性能优化能力。",
+          intro: `
+            <p>这个项目你要打的标签是：</p>
+            <ul>
+              <li>FastAPI</li>
+              <li>SSE</li>
+              <li>多模型协作</li>
+              <li>后端服务化</li>
+              <li>会话管理</li>
+              <li>持久化</li>
+              <li>性能优化</li>
+            </ul>
+          `,
+          items: [
+            {
+              id: "quorum-one-line",
+              kind: "一句话",
+              title: "一句话介绍项目",
+              html: `
+                <p>Quorum 是一个多模型协作式 AI 对话平台，支持单模型聊天、多模型讨论和共识生成，重点体现后端服务组织、流式返回和性能优化能力。</p>
+              `,
+            },
+            {
+              id: "quorum-1m",
+              kind: "话术",
+              title: "1 分钟项目介绍版",
+              html: `
+                <p>我做的第二个项目是 Quorum，一个多模型协作式 AI 对话平台。</p>
+                <p>它支持单模型聊天、多模型讨论和共识生成，重点不是单次回答，而是把复杂问题讨论过程做成一个可交互的产品形态。</p>
+                <p>在这个项目里，我重点锻炼的是后端服务组织能力和实时交互能力。</p>
+                <p>技术上我用了 FastAPI、SSE、Supabase 和 PostgreSQL，做了会话管理、消息处理、流式返回、历史记录和持久化。</p>
+                <p>后面我专门做了一轮性能优化，比如创建会话接口平均耗时从 4244ms 降到 397ms，消息接口平均耗时从 1173ms 降到 253ms，P95 从 2519ms 降到 1673ms，SSE 首字节时间也下降了 10.5%。</p>
+                <p>这个项目目前也已经上线。</p>
+              `,
+            },
+            {
+              id: "quorum-role",
+              kind: "问答",
+              title: "如果问：“你在这个项目里做了什么？”",
+              html: `
+                <p>我主要负责后端服务和前端交互链路的实现。</p>
+                <p>后端是基于 FastAPI 构建的，会负责会话管理、消息处理、模型调用和流式返回。</p>
+                <p>前端这边我也做了状态管理和交互联调。</p>
+                <p>同时我还做了历史记录、消息持久化、用户隔离，以及后面一轮比较明确的性能优化和上线部署。</p>
+              `,
+            },
+            {
+              id: "quorum-sse",
+              kind: "问答",
+              title: "如果问：“为什么用 SSE，不用 WebSocket？”",
+              html: `
+                <p>因为这个场景核心需求是服务端持续向前端推送生成内容，本质上是单向流式返回。</p>
+                <p>对这个项目来说，SSE 实现成本更低，也更符合文本生成这种“服务端不断输出”的模式。</p>
+                <p>WebSocket 更适合更强的双向实时通信场景，比如多人协同编辑。</p>
+                <p>所以在这个项目里，SSE 是更合适的选择。</p>
+              `,
+            },
+            {
+              id: "quorum-hard",
+              kind: "问答",
+              title: "如果问：“这个项目的难点是什么？”",
+              html: `
+                <p>这个项目的难点不在于同时调用多个模型，而在于怎么把多模型交互做成稳定系统。</p>
+                <p>因为一旦进入多轮对话、流式输出、历史记录和持久化，问题就不只是模型调用了，还会涉及状态管理、接口组织、时延控制和异常处理。</p>
+                <p>所以后面我把重点放在后端服务化和关键链路优化上。</p>
+              `,
+            },
+            {
+              id: "quorum-performance",
+              kind: "问答",
+              title: "如果问：“你做了哪些性能优化？”",
+              html: `
+                <p>这个你一定要练到很顺。</p>
+                <p>我做过一轮比较明确的后端性能优化。</p>
+                <p>最开始创建会话接口和消息接口都偏慢。</p>
+                <p>我排查后发现，瓶颈主要集中在认证校验、数据库访问方式和部分阻塞链路上。</p>
+                <p>后来我做了几件事：</p>
+                <ul>
+                  <li>第一，把部分 JWT 校验改成本地验证，减少远程认证开销；</li>
+                  <li>第二，优化 Supabase 客户端调用方式，减少关键路径阻塞；</li>
+                  <li>第三，重新梳理接口链路，把高耗时部分拆开。</li>
+                </ul>
+                <p>最终创建会话接口平均耗时从 4244ms 降到 397ms，消息接口从 1173ms 降到 253ms，P95 也下降了 33.6%。</p>
+              `,
+            },
+            {
+              id: "quorum-persistence",
+              kind: "问答",
+              title: "如果问：“为什么要做历史记录和持久化？”",
+              html: `
+                <p>因为如果没有历史记录和持久化，这个项目更像一次性 Demo。</p>
+                <p>但只要进入多轮对话、多模型讨论和后续追问场景，会话隔离、消息持久化就是基础能力。</p>
+                <p>我做这部分是希望它更接近真实产品，而不是只展示一次生成过程。</p>
+                <p>目前历史记录持久化成功率是 100%。</p>
+              `,
+            },
+            {
+              id: "quorum-eval",
+              kind: "问答",
+              title: "如果问：“你做过哪些指标评估？”",
+              html: `
+                <p>我主要关注两类指标。</p>
+                <p>一类是流式体验指标，比如 SSE 首字节时间和完整响应时间；</p>
+                <p>另一类是后端接口性能指标，比如创建会话接口平均耗时、消息接口平均耗时和 P95。</p>
+                <p>这些指标都做过优化前后的对比，不是只看感觉。</p>
+              `,
+            },
+            {
+              id: "quorum-limits",
+              kind: "问答",
+              title: "如果问：“你这个项目还有什么不足？”",
+              html: `
+                <p>目前我觉得主要还有三点不足。</p>
+                <ul>
+                  <li>第一，多模型协作效果的评估还不够严格，现在更多是产品形态验证和性能优化。</li>
+                  <li>第二，前端体验虽然已经比之前顺很多，但长对话场景下还有继续优化空间。</li>
+                  <li>第三，异常恢复、权限控制和更完整的工程化治理还可以继续补。</li>
+                </ul>
+                <p>所以我现在把它看成一个已经具备完整链路的可用产品原型。</p>
+              `,
+            },
+            {
+              id: "quorum-metrics",
+              kind: "指标",
+              title: "这个项目你要记死的指标",
+              html: `
+                <p>你必须张口就来：</p>
+                <ul>
+                  <li>SSE 首字节时间：1906ms → 1706ms（↓10.5%）</li>
+                  <li>完整响应时间：1975ms → 1802ms（↓8.8%）</li>
+                  <li>创建会话接口平均时间：4244ms → 397ms（↓90.6%）</li>
+                  <li>消息接口平均耗时：1173ms → 253ms（↓78.4%）</li>
+                  <li>P95 响应时间：2519ms → 1673ms（↓33.6%）</li>
+                  <li>历史记录持久化成功率：100%</li>
+                </ul>
+              `,
+            },
+          ],
+        },
+        {
+          id: "general",
+          step: "阶段 4 / 4",
+          title: "通用追问与收尾",
+          subtitle: "把通用追问、开放问题和最终顺序练顺，形成完整闭环。",
+          intro: `
+            <p>这个阶段最容易乱答，所以原则很简单：别飘，别鸡汤，别讲太空。</p>
+            <p>收尾阶段不追求花哨，追求稳定、真实、能落到你的项目和工程能力上。</p>
+          `,
+          items: [
+            {
+              id: "general-self-made",
+              kind: "通用追问",
+              title: "“这两个项目是你自己做的吗？”",
+              html: `
+                <p>主要是我自己主导完成的。</p>
+                <p>开发过程中我也会借助 AI 工具提升效率，但关键的架构选择、问题定位、联调、部署和优化是我自己在推进。</p>
+                <p>我比较重视的是把工具变成生产力，而不是把结果外包给工具。</p>
+              `,
+            },
+            {
+              id: "general-debug",
+              kind: "通用追问",
+              title: "“你最难排查的问题是什么？”",
+              html: `
+                <p><strong>insurance-rag 版本</strong></p>
+                <p>有一次线上页面出现“信息卡片无法生成”，一开始容易怀疑是数据库或者后端接口问题。</p>
+                <p>但我后来逐层排查 /api/health、/api/products/list、/api/search，发现后端其实是正常的。</p>
+                <p>最后判断更可能是前端运行态或者 bundle 问题，而不是后端问题。</p>
+                <p>这次让我更明确，线上排错不能凭感觉，要按链路逐层验证。</p>
+                <p><strong>Quorum 版本</strong></p>
+                <p>Quorum 这次部署时，连续踩了几个典型的部署坑，比如前端缺 Dockerfile、正式端口和反代不一致、临时验证容器还占用了正式后端端口。</p>
+                <p>我最后是把问题拆成代码问题和部署问题两类分别解决。</p>
+                <p>这次让我更清楚，线上问题很多时候不是业务代码本身错，而是部署链路和运行环境没对齐。</p>
+              `,
+            },
+            {
+              id: "general-frontend-backend",
+              kind: "通用追问",
+              title: "“你更偏前端还是后端？”",
+              html: `
+                <p>我现在是全链路都能做，但相对更想往 AI 应用后端 / 全栈偏后端方向走。</p>
+                <p>因为我更喜欢接口设计、系统链路、检索和流式交互这类问题。</p>
+                <p>不过如果项目需要，我也能把前端页面和联调一起承担下来。</p>
+              `,
+            },
+            {
+              id: "general-growth",
+              kind: "开放问题",
+              title: "“你未来想往哪个方向发展？”",
+              html: `
+                <p>我现在比较明确的方向是 AI 应用开发，尤其是全栈偏后端或者 AI 应用后端。</p>
+                <p>因为我比较感兴趣的是怎么把模型能力接到真实系统里，包括检索、服务接口、流式交互、数据库和部署。</p>
+                <p>短期内我想先把工程基础补扎实，比如后端开发、性能优化、数据库设计和项目协作。</p>
+                <p>长一点看，我希望自己能独立负责一个 AI 应用从需求到上线的完整链路。</p>
+              `,
+            },
+            {
+              id: "general-ai-view",
+              kind: "开放问题",
+              title: "“你对 AI 行业 / AI 发展怎么看？”",
+              html: `
+                <p>我觉得 AI 这几年最大的变化，不只是模型越来越强，而是它开始从“能力展示”走向“系统落地”。</p>
+                <p>真正有价值的，不只是会不会调模型，而是能不能把模型和检索、后端服务、业务流程、交互体验结合起来。</p>
+                <p>所以我比较关注的不是单点模型能力，而是 AI 应用工程化，比如 RAG、Agent、流式交互、自动化工作流这些方向。</p>
+                <p>我觉得未来公司真正需要的，也会是能把模型能力落地成稳定产品的人。</p>
+              `,
+            },
+            {
+              id: "general-why-company",
+              kind: "开放问题",
+              title: "“你为什么想来我们公司？”",
+              html: `
+                <p>这个你每次都要按公司改，不能死背。但骨架可以这样：</p>
+                <p>一方面是因为贵公司这个岗位和我现在做的方向比较匹配，都是偏 AI 应用落地 / 后端开发 / 全栈协作。</p>
+                <p>另一方面我现在最需要的是进入真实业务场景，看看一个项目在团队里是怎么从需求、开发、联调到上线推进的。</p>
+                <p>我觉得在学校里做项目可以练基本功，但要真正提高，还是需要进入更真实的工程环境。</p>
+              `,
+            },
+            {
+              id: "general-strength",
+              kind: "开放问题",
+              title: "“你的优点是什么？”",
+              html: `
+                <p>我觉得我比较明显的优点是愿意自己把问题追到底。</p>
+                <p>比如项目里碰到线上问题、接口性能问题或者部署问题，我不会停留在表面，而是会继续拆链路、定位原因、补验证。</p>
+                <p>另外我做项目时比较重视结果可验证，不太喜欢只停留在“看起来能跑”的阶段。</p>
+              `,
+            },
+            {
+              id: "general-weakness",
+              kind: "开放问题",
+              title: "“你的缺点是什么？”",
+              html: `
+                <p>不要说“完美主义”“太努力”。这种很蠢。</p>
+                <p>你可以这样答：</p>
+                <p>我现在比较明显的不足，是工程经验还不够系统。</p>
+                <p>因为我还在大二，很多能力目前主要来自自己做项目和主动摸索，所以在大型项目协作、规范化开发和更成熟的工程实践上还有提升空间。</p>
+                <p>但我比较清楚自己的短板，所以也在通过做真实项目、补评估和上线部署去弥补这一块。</p>
+                <p>这个答法稳。</p>
+              `,
+            },
+            {
+              id: "general-intern-content",
+              kind: "开放问题",
+              title: "“你期望的实习内容是什么？”",
+              html: `
+                <p>我希望做的是有真实业务价值的开发工作，最好能接触 AI 应用后端、服务接口、数据库、模型接入或者全栈协作。</p>
+                <p>我不排斥做基础工作，但希望这些工作能在完整项目链路里，而不是纯重复性、没有成长性的内容。</p>
+                <p>我比较希望在实习里补上真实团队协作和工程实践这一块。</p>
+              `,
+            },
+            {
+              id: "general-salary",
+              kind: "开放问题",
+              title: "“你期望薪资是多少？”",
+              html: `
+                <p>这个别装。你是大二实习。</p>
+                <p>比较稳的答法：</p>
+                <p>我目前还是更看重岗位方向、实际能参与的工作内容和成长空间。薪资方面我愿意参考贵公司的实习生标准，如果能匹配岗位要求和投入产出，我这边都可以接受。</p>
+                <p>如果对方逼你给数字：</p>
+                <p>上海 / 杭州 / 深圳 / 北京互联网环境，你可以答：</p>
+                <p>如果一定要给范围的话，我会希望在 150-250/天 或者公司内部实习标准范围内。</p>
+                <p>如果是普通中小公司：</p>
+                <p>我更倾向先看岗位匹配度和成长空间，薪资上愿意按公司实习标准来。</p>
+                <p>核心原则：</p>
+                <ul>
+                  <li>别报太高</li>
+                  <li>别说无所谓</li>
+                  <li>给弹性</li>
+                </ul>
+              `,
+            },
+            {
+              id: "general-availability",
+              kind: "开放问题",
+              title: "“你能实习多久？什么时候到岗？”",
+              html: `
+                <p>你要提前想好。</p>
+                <p>标准答法：</p>
+                <p>我目前可以尽快到岗。</p>
+                <p>如果顺利的话，我希望能连续实习至少 3 到 6 个月，这样也更有利于真正参与项目，而不是只做很短期的工作。</p>
+                <p>如果你课很多，就改成真实版本，别硬装全职。</p>
+              `,
+            },
+            {
+              id: "general-ask-back",
+              kind: "开放问题",
+              title: "“你还有什么想问我们的吗？”",
+              html: `
+                <p>这个一定要问，不要说“没有”。</p>
+                <p>你可以问这几个：</p>
+                <p><strong>版本 A：最稳</strong></p>
+                <p>我想了解一下，这个岗位进去之后，实习生更主要参与的是哪一类工作？是偏业务开发、模型接入，还是偏平台和工程化支持？</p>
+                <p><strong>版本 B：偏成长</strong></p>
+                <p>我想问一下，团队对这个岗位的期待是什么？如果一位实习生做得比较好，一般 1 到 3 个月后会承担哪些更核心的任务？</p>
+                <p><strong>版本 C：偏技术</strong></p>
+                <p>我想了解一下，团队现在在 AI 应用落地里更关注哪些方向？比如 RAG、Agent、工作流，还是模型服务化和工程效率这块？</p>
+                <p>别问：</p>
+                <ul>
+                  <li>加班多不多</li>
+                  <li>摸鱼空间大不大</li>
+                  <li>能不能转正（第一轮别急着问）</li>
+                </ul>
+              `,
+            },
+            {
+              id: "general-final-order",
+              kind: "总顺序",
+              title: "你最终要练熟的完整面试顺序",
+              html: `
+                <p>你实际按这个顺序准备最合理：</p>
+                <p><strong>Part 1：开场</strong></p>
+                <ul>
+                  <li>自我介绍 30 秒版</li>
+                  <li>自我介绍 1 分钟版</li>
+                  <li>为什么投这个方向</li>
+                </ul>
+                <p><strong>Part 2：第一项目 insurance-rag</strong></p>
+                <ul>
+                  <li>一句话介绍</li>
+                  <li>为什么做</li>
+                  <li>你负责什么</li>
+                  <li>为什么要结构化输出</li>
+                  <li>为什么做字段级引用</li>
+                  <li>为什么混合检索</li>
+                  <li>难点是什么</li>
+                  <li>指标是什么</li>
+                  <li>不足是什么</li>
+                </ul>
+                <p><strong>Part 3：第二项目 Quorum</strong></p>
+                <ul>
+                  <li>一句话介绍</li>
+                  <li>为什么做</li>
+                  <li>你负责什么</li>
+                  <li>为什么用 SSE</li>
+                  <li>难点是什么</li>
+                  <li>做了哪些性能优化</li>
+                  <li>为什么做历史记录和持久化</li>
+                  <li>指标是什么</li>
+                  <li>不足是什么</li>
+                </ul>
+                <p><strong>Part 4：通用追问</strong></p>
+                <ul>
+                  <li>这是不是你自己做的</li>
+                  <li>最难排查的问题是什么</li>
+                  <li>你偏前端还是后端</li>
+                  <li>为什么想做 AI 应用</li>
+                </ul>
+                <p><strong>Part 5：开放问题 / 收尾</strong></p>
+                <ul>
+                  <li>未来发展方向</li>
+                  <li>对 AI 发展的看法</li>
+                  <li>为什么来我们公司</li>
+                  <li>优点 / 缺点</li>
+                  <li>期望薪资</li>
+                  <li>能实习多久</li>
+                  <li>你有什么问题想问我们</li>
+                </ul>
+              `,
+            },
+          ],
+        },
+      ];
+
+      const state = loadState();
+      const heroPanel = document.getElementById("heroPanel");
+      const summaryStrip = document.getElementById("summaryStrip");
+      const roadmapEl = document.getElementById("roadmap");
+
+      function buildDefaultExpanded() {
+        const expanded = {};
+        ROADMAP.forEach((stage, index) => {
+          expanded[stage.id] = index === 0;
+        });
+        return expanded;
+      }
+
+      function loadState() {
+        const base = { remembered: {}, expanded: {}, hideRemembered: false };
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return base;
+          const parsed = JSON.parse(raw);
+          return {
+            remembered: parsed.remembered && typeof parsed.remembered === "object" ? parsed.remembered : {},
+            expanded: parsed.expanded && typeof parsed.expanded === "object" ? parsed.expanded : {},
+            hideRemembered: Boolean(parsed.hideRemembered),
+          };
+        } catch {
+          return base;
+        }
+      }
+
+      function ensureExpandedState() {
+        const defaults = buildDefaultExpanded();
+        ROADMAP.forEach((stage) => {
+          if (typeof state.expanded[stage.id] !== "boolean") {
+            state.expanded[stage.id] = defaults[stage.id];
+          }
+        });
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function allItems() {
+        return ROADMAP.flatMap((stage) =>
+          stage.items.map((item, index) => ({ ...item, stageId: stage.id, stageTitle: stage.title, index }))
+        );
+      }
+
+      function stageStats(stage) {
+        const remembered = stage.items.filter((item) => Boolean(state.remembered[item.id])).length;
+        return { remembered, total: stage.items.length, percent: stage.items.length ? Math.round((remembered / stage.items.length) * 100) : 0 };
+      }
+
+      function totalStats() {
+        const items = allItems();
+        const remembered = items.filter((item) => Boolean(state.remembered[item.id])).length;
+        return { remembered, total: items.length, percent: items.length ? Math.round((remembered / items.length) * 100) : 0 };
+      }
+
+      function firstUnremembered() {
+        return allItems().find((item) => !state.remembered[item.id]) || null;
+      }
+
+      function currentStageId() {
+        const stage = ROADMAP.find((entry) => stageStats(entry).remembered < entry.items.length);
+        return stage ? stage.id : (ROADMAP[ROADMAP.length - 1] && ROADMAP[ROADMAP.length - 1].id);
+      }
+
+      function renderHero() {
+        const total = totalStats();
+        const next = firstUnremembered();
+        const currentStage = ROADMAP.find((stage) => stage.id === currentStageId()) || ROADMAP[0];
+        const currentStats = currentStage ? stageStats(currentStage) : { remembered: 0, total: 0, percent: 0 };
+        const currentIndex = currentStage ? ROADMAP.findIndex((stage) => stage.id === currentStage.id) : 0;
+        const accent = STAGE_ACCENTS[currentIndex] || STAGE_ACCENTS[0];
+
+        heroPanel.innerHTML = `
+          <div class="panel-card">
+            <div class="panel-label">整体准备进度</div>
+            <div class="panel-value">${total.remembered} / ${total.total}</div>
+            <div class="progress-track"><div class="progress-bar" style="width:${total.percent}%"></div></div>
+          </div>
+          <div class="panel-card" style="border-color: color-mix(in srgb, ${accent} 26%, white); background: linear-gradient(180deg, color-mix(in srgb, ${accent} 6%, white), var(--panel));">
+            <div class="panel-label">当前阶段</div>
+            <div class="panel-value" style="font-size:28px; color:${accent}">${currentStage ? currentStage.step : "-"}</div>
+            <p style="margin-top:10px">${currentStage ? currentStage.title : "暂无内容"} · 已记住 ${currentStats.remembered}/${currentStats.total}</p>
+          </div>
+          <div class="panel-card">
+            <div class="panel-label">下一条建议</div>
+            <div class="panel-value" style="font-size:24px">${next ? next.title : "全部记住了"}</div>
+            <p style="margin-top:10px">${next ? next.stageTitle : "可以开始做完整模拟面试了。"}</p>
+          </div>
+        `;
+      }
+
+      function renderSummary() {
+        const currentId = currentStageId();
+        summaryStrip.innerHTML = ROADMAP.map((stage, index) => {
+          const stats = stageStats(stage);
+          const isComplete = stats.remembered === stats.total;
+          const isCurrent = stage.id === currentId;
+          const accent = STAGE_ACCENTS[index] || STAGE_ACCENTS[0];
+          return `
+            <button class="phase-chip ${isCurrent ? "is-current" : ""} ${isComplete ? "is-complete" : ""}" data-action="jump-stage" data-stage="${stage.id}" style="--stage-accent:${accent}">
+              <div class="phase-chip-shell">
+                <div class="phase-chip-marker">${index + 1}</div>
+                <div class="phase-chip-top">
+                  <span class="phase-chip-step">${stage.step}</span>
+                  <strong>${stats.remembered}/${stats.total}</strong>
+                </div>
+                <div class="phase-chip-title">${stage.title}</div>
+                <div class="phase-chip-meta">${isComplete ? "已完成" : isCurrent ? "当前阶段" : `${stats.percent}% 已记住`}</div>
+                <div class="progress-track" style="margin-top:12px"><div class="progress-bar" style="width:${stats.percent}%"></div></div>
+              </div>
+            </button>
+          `;
+        }).join("");
+      }
+
+      function renderRoadmap() {
+        const currentId = currentStageId();
+        roadmapEl.innerHTML = ROADMAP.map((stage, stageIndex) => {
+          const stats = stageStats(stage);
+          const isOpen = Boolean(state.expanded[stage.id]);
+          const isComplete = stats.remembered === stats.total;
+          const isCurrent = stage.id === currentId;
+          const visibleItems = stage.items.filter((item) => !state.hideRemembered || !state.remembered[item.id]);
+          const accent = STAGE_ACCENTS[stageIndex] || STAGE_ACCENTS[0];
+
+          return `
+            <section class="phase ${isCurrent ? "is-current" : ""} ${isComplete ? "is-complete" : ""}" id="phase-${stage.id}" style="--stage-accent:${accent}">
+              <button class="phase-header" data-action="toggle-stage" data-stage="${stage.id}">
+                <div class="phase-number">${stageIndex + 1}</div>
+                <div>
+                  <div class="phase-badge-row">
+                    <span class="phase-badge">${stage.step}</span>
+                    <span class="phase-badge ${isComplete ? "status-complete" : isCurrent ? "status-current" : "status-pending"}">
+                      ${isComplete ? "已完成" : isCurrent ? "当前阶段" : "待推进"}
+                    </span>
+                  </div>
+                  <div class="phase-title">${stage.title}</div>
+                  <div class="phase-subtitle">${stage.subtitle}</div>
+                </div>
+                <div class="phase-status">
+                  <strong>${stats.remembered} / ${stats.total}</strong>
+                  <span>${stats.percent}% 已记住 · ${isOpen ? "点击收起" : "点击展开"}</span>
+                </div>
+              </button>
+              ${isOpen ? `
+                <div class="phase-body">
+                  <div class="stage-intro">${stage.intro}</div>
+                  <div class="qa-list">
+                    ${
+                      visibleItems.length
+                        ? visibleItems.map((item, itemIndex) => {
+                            const remembered = Boolean(state.remembered[item.id]);
+                            return `
+                              <article class="qa-card ${remembered ? "remembered" : ""}">
+                                <div class="qa-head">
+                                  <div class="qa-index">${String(itemIndex + 1).padStart(2, "0")}</div>
+                                  <div>
+                                    <div class="qa-tag-row">
+                                      <span class="qa-tag">${item.kind}</span>
+                                      <span class="qa-tag status">${remembered ? "已记住" : "未记住"}</span>
+                                    </div>
+                                    <h3 class="qa-title">${item.title}</h3>
+                                  </div>
+                                  <button class="remember-button ${remembered ? "remembered" : ""}" data-action="toggle-item" data-item="${item.id}">
+                                    ${remembered ? "已记住" : "标记记住"}
+                                  </button>
+                                </div>
+                                <div class="qa-content">${item.html}</div>
+                              </article>
+                            `;
+                          }).join("")
+                        : `<div class="empty-stage">这一阶段当前展示的条目都已经记住了。</div>`
+                    }
+                  </div>
+                </div>
+              ` : ""}
+            </section>
+          `;
+        }).join("");
+      }
+
+      function renderControls() {
+        document.querySelector('[data-action="toggle-hide"]').classList.toggle("active", state.hideRemembered);
+      }
+
+      function render() {
+        ensureExpandedState();
+        renderHero();
+        renderSummary();
+        renderRoadmap();
+        renderControls();
+      }
+
+      function toggleItem(itemId) {
+        state.remembered[itemId] = !state.remembered[itemId];
+        saveState();
+        render();
+      }
+
+      function toggleStage(stageId) {
+        state.expanded[stageId] = !state.expanded[stageId];
+        saveState();
+        render();
+      }
+
+      function jumpToStage(stageId) {
+        state.expanded[stageId] = true;
+        saveState();
+        render();
+        requestAnimationFrame(() => {
+          document.getElementById(`phase-${stageId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+
+      function focusCurrentStage() {
+        const id = currentStageId();
+        if (id) jumpToStage(id);
+      }
+
+      function toggleHideRemembered() {
+        state.hideRemembered = !state.hideRemembered;
+        saveState();
+        render();
+      }
+
+      function toggleExpandAll() {
+        const shouldExpand = !ROADMAP.every((stage) => Boolean(state.expanded[stage.id]));
+        ROADMAP.forEach((stage) => {
+          state.expanded[stage.id] = shouldExpand;
+        });
+        saveState();
+        render();
+      }
+
+      function resetAll() {
+        if (!window.confirm("确定要清空所有“已记住”状态吗？")) return;
+        state.remembered = {};
+        state.expanded = buildDefaultExpanded();
+        state.hideRemembered = false;
+        saveState();
+        render();
+      }
+
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest("[data-action]");
+        if (!target) return;
+        const action = target.dataset.action;
+        if (action === "toggle-item") toggleItem(target.dataset.item);
+        if (action === "toggle-stage") toggleStage(target.dataset.stage);
+        if (action === "jump-stage") jumpToStage(target.dataset.stage);
+        if (action === "focus-current") focusCurrentStage();
+        if (action === "toggle-hide") toggleHideRemembered();
+        if (action === "toggle-expand") toggleExpandAll();
+        if (action === "reset") resetAll();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
