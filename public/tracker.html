@@ -39,8 +39,11 @@
         background-size: 24px 24px, 24px 24px, auto;
         color: var(--text);
       }
+      body.ai-open {
+        overflow: hidden;
+      }
 
-      button, input { font: inherit; }
+      button, input, textarea { font: inherit; }
 
       .shell { width: min(1200px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 80px; }
       .hero {
@@ -105,6 +108,19 @@
       }
       .control-button:hover, .phase-chip:hover, .remember-button:hover { border-color: #a59b86; background: #ffffff; }
       .control-button.active { border-color: rgba(20,86,255,.24); background: var(--brand-soft); color: var(--brand); }
+      
+      /* Micro-animations */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .phase-chip, .phase {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .phase:nth-child(1) { animation-delay: 0.05s; }
+      .phase:nth-child(2) { animation-delay: 0.1s; }
+      .phase:nth-child(3) { animation-delay: 0.15s; }
+      .phase:nth-child(4) { animation-delay: 0.2s; }
       .summary-strip {
         position: relative;
         display: grid;
@@ -353,12 +369,27 @@
         letter-spacing: -.02em;
         color: var(--text);
       }
-      .remember-button {
+      .qa-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+      }
+      .remember-button, .ai-button {
         min-width: 116px; min-height: 44px; padding: 0 14px;
         border-radius: 16px; cursor: pointer; transition: 180ms ease;
         box-shadow: none;
       }
       .remember-button.remembered { border-color: rgba(107,226,183,.26); background: var(--ok-soft); color: var(--ok); }
+      .ai-button {
+        border: 1px solid rgba(20,86,255,.18);
+        background: rgba(20,86,255,.08);
+        color: var(--brand);
+      }
+      .ai-button:hover {
+        border-color: rgba(20,86,255,.3);
+        background: rgba(20,86,255,.12);
+      }
       .qa-content {
         margin-top: 16px;
         padding-left: 50px;
@@ -380,6 +411,225 @@
         line-height: 1.8;
         background: rgba(255,255,255,.76);
       }
+      .ai-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(18,20,23,.34);
+        backdrop-filter: blur(8px);
+        z-index: 40;
+      }
+      .ai-modal.open { display: flex; }
+      .ai-dialog {
+        width: min(960px, 100%);
+        height: min(94vh, 1200px);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,245,238,.98));
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .ai-header {
+        display: flex;
+        gap: 16px;
+        align-items: start;
+        justify-content: space-between;
+      }
+      .ai-header-copy {
+        min-width: 0;
+      }
+      .ai-label {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(20,86,255,.14);
+        background: rgba(20,86,255,.06);
+        color: var(--brand);
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .ai-title {
+        margin: 10px 0 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        font-size: clamp(24px, 4vw, 32px);
+        line-height: 1.2;
+        letter-spacing: -.03em;
+      }
+      .ai-subtitle {
+        margin-top: 8px;
+        color: var(--text-soft);
+        line-height: 1.8;
+      }
+      .ai-close {
+        min-width: 44px;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255,255,255,.72);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .ai-note {
+        padding: 14px 16px;
+        border: 1px solid rgba(20,86,255,.12);
+        border-radius: 18px;
+        background: rgba(20,86,255,.05);
+        color: var(--text);
+        line-height: 1.8;
+      }
+      .ai-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .ai-chip {
+        min-height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255,255,255,.82);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .ai-chip:hover {
+        border-color: rgba(20,86,255,.18);
+        background: rgba(20,86,255,.06);
+        color: var(--brand);
+      }
+      .ai-thread {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        display: grid;
+        gap: 12px;
+        padding-right: 4px;
+        padding-bottom: 4px;
+      }
+      .ai-empty {
+        padding: 22px 18px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 20px;
+        background: rgba(255,255,255,.54);
+        color: var(--text-soft);
+        line-height: 1.8;
+      }
+      .ai-message {
+        max-width: min(100%, 700px);
+        padding: 16px 18px;
+        border-radius: 22px;
+        line-height: 1.85;
+        white-space: normal;
+      }
+      .ai-message.user {
+        margin-left: auto;
+        border: 1px solid rgba(20,86,255,.18);
+        background: rgba(20,86,255,.08);
+      }
+      .ai-message.assistant {
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,.86);
+      }
+      .ai-markdown h1, .ai-markdown h2, .ai-markdown h3 {
+        margin: 0 0 12px;
+        color: var(--text);
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        line-height: 1.25;
+        letter-spacing: -.03em;
+      }
+      .ai-markdown h1 { font-size: 28px; }
+      .ai-markdown h2 { font-size: 24px; }
+      .ai-markdown h3 { font-size: 21px; }
+      .ai-markdown p {
+        margin: 0 0 12px;
+        color: var(--text);
+      }
+      .ai-markdown ul, .ai-markdown ol {
+        margin: 0 0 16px;
+        padding-left: 1.25rem;
+      }
+      .ai-markdown li + li {
+        margin-top: 8px;
+      }
+      .ai-markdown strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+      .ai-markdown code {
+        padding: 0 6px;
+        border-radius: 8px;
+        background: rgba(18,20,23,.06);
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: .95em;
+      }
+      .ai-markdown > :last-child {
+        margin-bottom: 0;
+      }
+      .ai-error {
+        padding: 14px 16px;
+        border: 1px solid rgba(239,127,45,.2);
+        border-radius: 18px;
+        background: rgba(239,127,45,.08);
+        color: #9d541d;
+        line-height: 1.7;
+      }
+      .ai-composer {
+        display: grid;
+        gap: 10px;
+        flex-shrink: 0;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(248,245,238,0), rgba(248,245,238,.94) 24%, rgba(248,245,238,.98));
+      }
+      .ai-input {
+        width: 100%;
+        min-height: 104px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        resize: vertical;
+        outline: none;
+        background: rgba(255,255,255,.9);
+        color: var(--text);
+      }
+      .ai-input:focus {
+        border-color: rgba(20,86,255,.24);
+        box-shadow: 0 0 0 4px rgba(20,86,255,.08);
+      }
+      .ai-footer {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .ai-muted {
+        color: var(--text-soft);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .ai-send {
+        min-height: 46px;
+        padding: 0 18px;
+        border: 1px solid rgba(20,86,255,.18);
+        border-radius: 999px;
+        background: var(--brand);
+        color: white;
+        cursor: pointer;
+        box-shadow: var(--shadow-soft);
+      }
+      .ai-send[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+      }
       @media (max-width: 980px) {
         .hero { grid-template-columns: 1fr; }
         .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -390,7 +640,7 @@
         .phase-header { grid-template-columns: auto minmax(0, 1fr); }
         .phase-status { grid-column: 1 / -1; align-items: flex-start; margin-left: 64px; min-width: 0; }
         .qa-head { grid-template-columns: auto minmax(0,1fr); }
-        .remember-button { grid-column: 2; justify-self: start; }
+        .qa-actions { grid-column: 2; justify-self: start; width: 100%; max-width: 220px; }
         .qa-content { padding-left: 0; }
       }
       @media (max-width: 720px) {
@@ -403,6 +653,18 @@
         .phase::after { display: none; }
         .phase-title { font-size: 22px; }
         .qa-title { font-size: 19px; }
+        .ai-modal { padding: 0; align-items: flex-end; }
+        .ai-dialog {
+          width: 100%;
+          height: 100dvh;
+          border-radius: 24px 24px 0 0;
+          border-bottom: none;
+        }
+        .ai-footer {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .ai-send { width: 100%; }
       }
     </style>
   </head>
@@ -412,7 +674,7 @@
         <div>
           <div class="eyebrow">Interview Prep Tracker</div>
           <h1>面试备考追踪器</h1>
-          <p>按真实面试顺序推进：先开场，再讲项目，最后补通用追问和收尾。每条内容只有两个状态：记住 / 未记住。</p>
+          <p>按真实面试顺序推进：先开场，再讲项目，最后补通用追问和收尾。每条内容只有两个状态：记住 / 未记住。现在如果某道题你看着懂、但说不明白，也可以直接点题卡里的“追问 AI”。</p>
           <div class="controls">
             <button class="control-button" data-action="focus-current">继续当前阶段</button>
             <button class="control-button" data-action="toggle-hide">隐藏已记住</button>
@@ -427,9 +689,43 @@
       <div class="footer-note">只有两种状态：<strong>记住</strong> / <strong>未记住</strong>。不做假的熟练度评级，不做假的准备度推断。什么时候你真的记住了，就点一下。</div>
     </div>
 
+    <div class="ai-modal" id="aiModal" aria-hidden="true">
+      <div class="ai-dialog" role="dialog" aria-modal="true" aria-labelledby="aiTitle">
+        <div class="ai-header">
+          <div class="ai-header-copy">
+            <div class="ai-label">追问 AI</div>
+            <h2 class="ai-title" id="aiTitle">这题到底是什么意思？</h2>
+            <div class="ai-subtitle" id="aiSubtitle">AI 会结合当前题目和项目背景，用更白话的方式帮你理解。</div>
+          </div>
+          <button class="ai-close" type="button" data-action="close-ai" aria-label="关闭">×</button>
+        </div>
+        <div class="ai-note">这里不会给你一堆代码解释。它会优先告诉你：这题在问什么、放在项目里是什么意思、你大概应该怎么理解和表述。</div>
+        <div class="ai-chips">
+          <button class="ai-chip" type="button" data-action="ask-ai-chip" data-prompt="这题到底是什么意思？">这题到底是什么意思？</button>
+          <button class="ai-chip" type="button" data-action="ask-ai-chip" data-prompt="面试官为什么会问这题？">面试官为什么会问这题？</button>
+          <button class="ai-chip" type="button" data-action="ask-ai-chip" data-prompt="你能用更白话的方式解释吗？">你能用更白话的方式解释吗？</button>
+        </div>
+        <div class="ai-thread" id="aiThread"></div>
+        <div class="ai-error" id="aiError" hidden></div>
+        <div class="ai-composer">
+          <textarea class="ai-input" id="aiInput" placeholder="把你现在卡住的点直接写出来，比如：我知道要说结构化输出，但它到底解决了什么问题？"></textarea>
+          <div class="ai-footer">
+            <div class="ai-muted" id="aiStatus">它会尽量结合当前题目和对应项目背景来解释概念。</div>
+            <button class="ai-send" type="button" data-action="send-ai">发送追问</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const STORAGE_KEY = "interview-roadmap-tracker/v1";
       const STAGE_ACCENTS = ["#1456ff", "#0f9a72", "#ef7f2d", "#c13ec8"];
+      const CATEGORY_BY_STAGE = {
+        opening: "self-intro",
+        "insurance-rag": "insurance-rag",
+        quorum: "quorum",
+        general: "open-ended",
+      };
       const ROADMAP = [
         {
           id: "opening",
@@ -994,6 +1290,19 @@
       const heroPanel = document.getElementById("heroPanel");
       const summaryStrip = document.getElementById("summaryStrip");
       const roadmapEl = document.getElementById("roadmap");
+      const aiModal = document.getElementById("aiModal");
+      const aiTitle = document.getElementById("aiTitle");
+      const aiSubtitle = document.getElementById("aiSubtitle");
+      const aiThread = document.getElementById("aiThread");
+      const aiInput = document.getElementById("aiInput");
+      const aiStatus = document.getElementById("aiStatus");
+      const aiError = document.getElementById("aiError");
+      const aiSendButton = document.querySelector('[data-action="send-ai"]');
+      const aiState = {
+        item: null,
+        messages: [],
+        loading: false,
+      };
 
       function buildDefaultExpanded() {
         const expanded = {};
@@ -1036,6 +1345,216 @@
         return ROADMAP.flatMap((stage) =>
           stage.items.map((item, index) => ({ ...item, stageId: stage.id, stageTitle: stage.title, index }))
         );
+      }
+
+      function escapeHtml(value) {
+        return value
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatInlineMarkdown(value) {
+        return value
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>");
+      }
+
+      function renderMarkdown(markdown) {
+        const lines = escapeHtml(markdown).split(/\r?\n/);
+        const blocks = [];
+        let listMode = null;
+
+        function closeListIfNeeded() {
+          if (listMode) {
+            blocks.push(listMode === "ol" ? "</ol>" : "</ul>");
+            listMode = null;
+          }
+        }
+
+        lines.forEach((rawLine) => {
+          const line = rawLine.trim();
+          if (!line) {
+            closeListIfNeeded();
+            return;
+          }
+
+          if (/^#{1,3}\s+/.test(line)) {
+            closeListIfNeeded();
+            const level = Math.min((line.match(/^#+/)[0] || "#").length, 3);
+            const text = line.replace(/^#{1,3}\s+/, "");
+            blocks.push(`<h${level}>${formatInlineMarkdown(text)}</h${level}>`);
+            return;
+          }
+
+          if (/^[-*]\s+/.test(line)) {
+            if (listMode !== "ul") {
+              closeListIfNeeded();
+              listMode = "ul";
+              blocks.push("<ul>");
+            }
+            blocks.push(`<li>${formatInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`);
+            return;
+          }
+
+          if (/^\d+\.\s+/.test(line)) {
+            if (listMode !== "ol") {
+              closeListIfNeeded();
+              listMode = "ol";
+              blocks.push("<ol>");
+            }
+            blocks.push(`<li>${formatInlineMarkdown(line.replace(/^\d+\.\s+/, ""))}</li>`);
+            return;
+          }
+
+          closeListIfNeeded();
+          blocks.push(`<p>${formatInlineMarkdown(line)}</p>`);
+        });
+
+        closeListIfNeeded();
+        return `<div class="ai-markdown">${blocks.join("")}</div>`;
+      }
+
+      function htmlToPlainText(html) {
+        const el = document.createElement("div");
+        el.innerHTML = html;
+        return (el.textContent || "").replace(/\s+/g, " ").trim();
+      }
+
+      function htmlToBullets(html) {
+        const el = document.createElement("div");
+        el.innerHTML = html;
+        return Array.from(el.querySelectorAll("li"))
+          .map((node) => (node.textContent || "").replace(/\s+/g, " ").trim())
+          .filter(Boolean);
+      }
+
+      function buildTrackerQuestionContext(item) {
+        const plainText = htmlToPlainText(item.html);
+        const bullets = htmlToBullets(item.html);
+        return {
+          id: item.id,
+          category: CATEGORY_BY_STAGE[item.stageId] || "open-ended",
+          question: item.title,
+          standardAnswer: plainText,
+          shortAnswer: plainText.slice(0, 160),
+          bulletPoints: bullets,
+          mustRememberMetrics: item.kind === "指标" ? bullets : [],
+          commonFollowUps: [],
+          pitfalls: [],
+          notes: `当前阶段：${item.stageTitle}`,
+        };
+      }
+
+        function renderAiThread() {
+        if (!aiState.messages.length) {
+          aiThread.innerHTML = `
+            <div class="ai-empty">
+              先从一个最具体的卡点开始问，会比“帮我讲一讲这题”更有效。<br />
+              例如：<strong>这题到底在讲什么？</strong> 或 <strong>这个概念放在项目里解决了什么问题？</strong>
+            </div>
+          `;
+          return;
+        }
+
+          aiThread.innerHTML = aiState.messages.map((message) => `
+            <div class="ai-message ${message.role}">
+              ${message.role === "assistant"
+                ? renderMarkdown(message.content)
+                : escapeHtml(message.content).replace(/\n/g, "<br />")}
+            </div>
+          `).join("");
+          aiThread.scrollTop = aiThread.scrollHeight;
+        }
+
+        function renderAiState() {
+          const hasItem = Boolean(aiState.item);
+          aiModal.classList.toggle("open", hasItem);
+          aiModal.setAttribute("aria-hidden", hasItem ? "false" : "true");
+          document.body.classList.toggle("ai-open", hasItem);
+          aiSendButton.disabled = aiState.loading;
+          aiInput.disabled = aiState.loading;
+          if (!hasItem) return;
+
+          aiTitle.textContent = aiState.item.title;
+          aiSubtitle.textContent = `${aiState.item.stageTitle} · 你可以直接问“这题是什么意思”，AI 会尽量用白话解释。`;
+          aiStatus.textContent = aiState.loading
+            ? "AI 正在整理更好懂的解释..."
+            : "它会尽量结合当前题目和对应项目背景来解释概念。";
+          renderAiThread();
+        }
+
+      function openAiModalForItem(itemId) {
+        const item = allItems().find((entry) => entry.id === itemId);
+        if (!item) return;
+
+        aiState.item = item;
+        aiState.messages = [];
+        aiState.loading = false;
+        aiInput.value = "";
+        aiError.hidden = true;
+        aiError.textContent = "";
+        renderAiState();
+        requestAnimationFrame(() => aiInput.focus());
+      }
+
+      function closeAiModal() {
+        aiState.item = null;
+        aiState.messages = [];
+        aiState.loading = false;
+        aiInput.value = "";
+        aiError.hidden = true;
+        aiError.textContent = "";
+        renderAiState();
+      }
+
+      async function sendAiQuestion(rawQuestion) {
+        const userQuestion = (rawQuestion || aiInput.value || "").trim();
+        if (!userQuestion || aiState.loading || !aiState.item) return;
+
+        const history = aiState.messages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        }));
+
+        aiState.messages.push({ role: "user", content: userQuestion });
+        aiState.loading = true;
+        aiError.hidden = true;
+        aiError.textContent = "";
+        aiInput.value = "";
+        renderAiState();
+
+        try {
+          const response = await fetch("/api/interview-ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              question: buildTrackerQuestionContext(aiState.item),
+              userQuestion,
+              history,
+              responseStyle: "concept",
+            }),
+          });
+
+          const payload = await response.json();
+          if (!response.ok || payload.error) {
+            throw new Error(payload.error || "AI 暂时没有返回结果。");
+          }
+
+          aiState.messages.push({
+            role: "assistant",
+            content: payload.answer || "AI 这次没有生成可用内容。",
+          });
+        } catch (error) {
+          aiError.hidden = false;
+          aiError.textContent = error instanceof Error ? error.message : "AI 暂时不可用，请稍后再试。";
+        } finally {
+          aiState.loading = false;
+          renderAiState();
+          requestAnimationFrame(() => aiInput.focus());
+        }
       }
 
       function stageStats(stage) {
@@ -1157,9 +1676,14 @@
                                     </div>
                                     <h3 class="qa-title">${item.title}</h3>
                                   </div>
-                                  <button class="remember-button ${remembered ? "remembered" : ""}" data-action="toggle-item" data-item="${item.id}">
-                                    ${remembered ? "已记住" : "标记记住"}
-                                  </button>
+                                  <div class="qa-actions">
+                                    <button class="remember-button ${remembered ? "remembered" : ""}" data-action="toggle-item" data-item="${item.id}">
+                                      ${remembered ? "已记住" : "标记记住"}
+                                    </button>
+                                    <button class="ai-button" data-action="ask-ai" data-item="${item.id}">
+                                      追问 AI
+                                    </button>
+                                  </div>
                                 </div>
                                 <div class="qa-content">${item.html}</div>
                               </article>
@@ -1248,6 +1772,26 @@
         if (action === "toggle-hide") toggleHideRemembered();
         if (action === "toggle-expand") toggleExpandAll();
         if (action === "reset") resetAll();
+        if (action === "ask-ai") openAiModalForItem(target.dataset.item);
+        if (action === "close-ai") closeAiModal();
+        if (action === "ask-ai-chip") sendAiQuestion(target.dataset.prompt);
+        if (action === "send-ai") sendAiQuestion();
+      });
+
+      aiModal.addEventListener("click", (event) => {
+        if (event.target === aiModal) {
+          closeAiModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && aiState.item) {
+          closeAiModal();
+        }
+
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && aiState.item) {
+          sendAiQuestion();
+        }
       });
 
       render();

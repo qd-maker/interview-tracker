@@ -9,7 +9,10 @@ import {
   SkipForward,
 } from "lucide-react"
 
+import { MarkdownContent } from "@/components/interview/markdown-content"
+
 import { useInterview } from "@/components/interview/interview-provider"
+import { QuestionAiAssistant } from "@/components/interview/question-ai-assistant"
 import { InterviewShell } from "@/components/interview/shell"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,7 +20,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { MODULES } from "@/lib/interview-data"
 import {
-  ASSESSMENT_HINTS,
   ASSESSMENT_LABELS,
   STATUS_LABELS,
   formatDateLabel,
@@ -299,9 +301,9 @@ export function PracticePage() {
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="rounded-[28px] border border-white/8 bg-[#0b1624] p-6">
+                <div className="rounded-[28px] border border-white/8 bg-[#0b1624] p-4 md:p-6">
                   <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Question</p>
-                  <h2 className="mt-4 max-w-4xl text-2xl leading-10 font-semibold text-white lg:text-[2rem]">
+                  <h2 className="mt-3 max-w-4xl text-xl leading-9 font-semibold text-white md:mt-4 md:text-2xl md:leading-10 lg:text-[2rem]">
                     {currentQuestion.question}
                   </h2>
                   <div className="mt-6 flex flex-wrap gap-2">
@@ -314,6 +316,12 @@ export function PracticePage() {
                     {currentQuestion.highPriority ? (
                       <Badge className="bg-rose-400/12 text-rose-100">高优先</Badge>
                     ) : null}
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-white/8 bg-black/10 px-4 py-3">
+                    <p className="hidden text-sm leading-6 text-slate-300 md:block">
+                      如果这题一下子卡住了，可以直接让 AI 结合项目源码帮你拆开讲。
+                    </p>
+                    <QuestionAiAssistant question={currentQuestion} triggerLabel="追问 AI" />
                   </div>
                 </div>
 
@@ -369,16 +377,19 @@ export function PracticePage() {
                             ))}
                           </ul>
                         ) : (
-                          <p className="max-w-4xl text-[15px] leading-8 text-slate-100 lg:text-base">
-                            {answerView === "standard"
-                              ? currentQuestion.standardAnswer
-                              : currentQuestion.shortAnswer}
-                          </p>
+                          <div className="max-w-4xl">
+                            <MarkdownContent>
+                              {answerView === "standard"
+                                ? currentQuestion.standardAnswer
+                                : currentQuestion.shortAnswer}
+                            </MarkdownContent>
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid gap-4 xl:grid-cols-3">
+                    {/* 桌面端展开、手机端可折叠 */}
+                    <div className="hidden gap-4 md:grid xl:grid-cols-3">
                       <div className="rounded-[24px] border border-white/8 bg-black/10 p-4">
                         <p className="text-sm font-medium text-white">指标记忆</p>
                         <div className="mt-3 flex flex-wrap gap-2">
@@ -407,28 +418,54 @@ export function PracticePage() {
                       </div>
                     </div>
 
-                    <div className="rounded-[24px] border border-white/8 bg-black/10 p-5">
-                      <p className="text-sm font-medium text-white">答完自评一下</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-400">
-                        自评会自动更新这道题的熟练度和最近练习记录。
-                      </p>
-                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    {/* 手机端可折叠版本 */}
+                    <div className="space-y-2 md:hidden">
+                      <details className="group rounded-[20px] border border-white/8 bg-black/10">
+                        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-white">
+                          指标记忆 · 追问 · 踩坑
+                        </summary>
+                        <div className="space-y-3 px-4 pb-4">
+                          <div className="flex flex-wrap gap-2">
+                            {currentQuestion.mustRememberMetrics.map((metric) => (
+                              <Badge key={metric} className="bg-sky-400/12 text-sky-100">
+                                {metric}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">常见追问</p>
+                            <ul className="mt-2 space-y-1 text-sm leading-7 text-slate-300">
+                              {currentQuestion.commonFollowUps.map((item) => (
+                                <li key={item}>• {item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">容易踩坑</p>
+                            <ul className="mt-2 space-y-1 text-sm leading-7 text-slate-300">
+                              {currentQuestion.pitfalls.map((item) => (
+                                <li key={item}>• {item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </details>
+                    </div>
+
+                    <div className="sticky bottom-0 z-10 -mx-4 rounded-b-[24px] border-t border-white/8 bg-[#07111d]/95 px-4 py-4 backdrop-blur-md lg:-mx-5 lg:px-5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="mr-auto text-sm font-medium text-white">自评：</p>
                         {(["missed", "okay", "smooth"] as const).map((assessment, index) => (
                           <button
                             key={assessment}
                             type="button"
                             onClick={() => recordPractice(assessment)}
-                            className="rounded-[22px] border border-white/8 bg-white/5 p-4 text-left transition hover:border-white/16 hover:bg-white/8"
+                            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white transition hover:border-white/20 hover:bg-white/10"
                           >
-                            <div className="flex items-center justify-between">
-                              <p className="font-medium text-white">{ASSESSMENT_LABELS[assessment]}</p>
-                              <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                                {index + 1}
-                              </Badge>
-                            </div>
-                            <p className="mt-2 text-sm leading-6 text-slate-400">
-                              {ASSESSMENT_HINTS[assessment]}
-                            </p>
+                            <span>{ASSESSMENT_LABELS[assessment]}</span>
+                            <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-400">
+                              {index + 1}
+                            </Badge>
                           </button>
                         ))}
                       </div>

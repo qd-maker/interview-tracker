@@ -4,7 +4,10 @@ import { useDeferredValue, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Download, FileUp, Search, Sparkles, Star } from "lucide-react"
 
+import { MarkdownContent } from "@/components/interview/markdown-content"
+
 import { useInterview } from "@/components/interview/interview-provider"
+import { QuestionAiAssistant } from "@/components/interview/question-ai-assistant"
 import { InterviewShell } from "@/components/interview/shell"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -266,47 +269,59 @@ export function LibraryPage() {
               filteredQuestions.map((question) => {
                 const active = question.id === selectedQuestionId
                 return (
-                  <button
+                  <div
                     key={question.id}
-                    type="button"
-                    onClick={() => setSelectedQuestionId(question.id)}
                     className={`rounded-[24px] border p-4 text-left transition-all ${
                       active
                         ? "border-sky-300/30 bg-sky-300/10"
                         : "border-white/8 bg-black/10 hover:border-white/14 hover:bg-black/14"
                     }`}
                   >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap gap-2">
-                          <Badge className="bg-white/8 text-slate-100">
-                            {MODULES.find((module) => module.id === question.category)?.shortLabel}
-                          </Badge>
-                          {question.highPriority ? (
-                            <Badge className="bg-rose-400/12 text-rose-100">
-                              <Star className="size-3.5" />
-                              高优先
+                    <button
+                      type="button"
+                      onClick={() => setSelectedQuestionId(question.id)}
+                      className="w-full text-left"
+                    >
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="bg-white/8 text-slate-100">
+                              {MODULES.find((module) => module.id === question.category)?.shortLabel}
                             </Badge>
-                          ) : null}
+                            {question.highPriority ? (
+                              <Badge className="bg-rose-400/12 text-rose-100">
+                                <Star className="size-3.5" />
+                                高优先
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <p className="mt-3 text-base leading-7 text-white">{question.question}</p>
+                          <p className="mt-1 line-clamp-1 text-sm leading-6 text-slate-400">
+                            {question.shortAnswer}
+                          </p>
                         </div>
-                        <p className="mt-3 text-base leading-7 text-white">{question.question}</p>
-                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-400">
-                          {question.shortAnswer}
-                        </p>
+                        <div className="flex shrink-0 flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
+                            {STATUS_LABELS[question.status]}
+                          </Badge>
+                          <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
+                            准备度 {getReadinessScore(question)}
+                          </Badge>
+                          <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
+                            {formatRelativeDay(question.lastReviewedAt)}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex shrink-0 flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                          {STATUS_LABELS[question.status]}
-                        </Badge>
-                        <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                          准备度 {getReadinessScore(question)}
-                        </Badge>
-                        <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                          {formatRelativeDay(question.lastReviewedAt)}
-                        </Badge>
-                      </div>
+                    </button>
+
+                    <div className="mt-3 flex items-center justify-end border-t border-white/8 pt-3">
+                      <QuestionAiAssistant
+                        question={question}
+                        triggerLabel="问这题"
+                        className="border-white/10 bg-white/5 text-white"
+                      />
                     </div>
-                  </button>
+                  </div>
                 )
               })
             ) : (
@@ -326,6 +341,16 @@ export function LibraryPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-white/8 bg-black/10 px-4 py-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-white">卡住的时候，直接追问 AI</p>
+                  <p className="text-sm leading-6 text-slate-400">
+                    它会把这道题、你的答案和对应项目源码一起带进上下文里。
+                  </p>
+                </div>
+                <QuestionAiAssistant question={selectedQuestion} />
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 {[
                   ["short", "面试口语版"],
@@ -356,11 +381,13 @@ export function LibraryPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="max-w-4xl text-[15px] leading-8 text-slate-100 lg:text-base">
-                    {answerView === "standard"
-                      ? selectedQuestion.standardAnswer
-                      : selectedQuestion.shortAnswer}
-                  </p>
+                  <div className="max-w-4xl">
+                    <MarkdownContent>
+                      {answerView === "standard"
+                        ? selectedQuestion.standardAnswer
+                        : selectedQuestion.shortAnswer}
+                    </MarkdownContent>
+                  </div>
                 )}
               </div>
 

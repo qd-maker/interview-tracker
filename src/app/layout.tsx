@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 
+import { InterviewProvider } from "@/components/interview/interview-provider"
+
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -14,7 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <InterviewProvider>{children}</InterviewProvider>
+      </body>
     </html>
   )
 }

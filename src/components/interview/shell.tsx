@@ -128,7 +128,7 @@ export function InterviewShell({
           )}
         </header>
 
-        <nav className="mb-4 flex flex-wrap gap-2">
+        <nav className="mb-4 hidden flex-wrap gap-2 md:flex">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = pathname === item.href
@@ -167,12 +167,36 @@ export function InterviewShell({
           {leftRail ? (
             <aside className="space-y-4 xl:sticky xl:top-4 xl:self-start">{leftRail}</aside>
           ) : null}
-          <main className="min-w-0">{children}</main>
+          <main className="min-w-0 animate-fade-in-up pb-20 md:pb-0">{children}</main>
           {rightRail ? (
             <aside className="space-y-4 xl:sticky xl:top-4 xl:self-start">{rightRail}</aside>
           ) : null}
         </div>
       </div>
+
+      {/* ── 移动端底部导航栏 ── */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-white/10 bg-[#06111b]/90 px-2 py-2 backdrop-blur-xl md:hidden">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon
+          const active = pathname === item.href
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-2xl px-4 py-2 text-xs transition-all",
+                active
+                  ? "bg-sky-300/12 text-sky-200"
+                  : "text-slate-400 active:bg-white/5"
+              )}
+            >
+              <Icon className="size-5" />
+              {item.label}
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }

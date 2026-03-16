@@ -8,6 +8,7 @@ import {
   BookOpen,
   CircleDashed,
   Clock3,
+  MessageCircleQuestion,
   PlayCircle,
   Sparkles,
   Target,
@@ -297,6 +298,24 @@ export function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="border-white/8 bg-white/6 shadow-none">
+              <CardHeader>
+                <CardTitle>手机上看题卡住了怎么办</CardTitle>
+                <CardDescription>这版已经不是纯题库了，每道题都能直接追问 AI。</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                <div className="rounded-[24px] border border-white/8 bg-black/10 p-4 text-sm leading-7 text-slate-300">
+                  进入题库页后，每张题卡下方都有“问这题”。AI 会结合题目答案、你的备注和两个项目的真实源码来解释，不再只是泛泛回答。
+                </div>
+                <Button asChild>
+                  <Link href="/library">
+                    <MessageCircleQuestion className="size-4" />
+                    去题库问 AI
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </>
         ) : (
           <>
@@ -388,6 +407,24 @@ export function DashboardPage() {
                     你还没有形成最近练习记录，先开始一轮输出就会出现。
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/8 bg-white/6 shadow-none">
+              <CardHeader>
+                <CardTitle>追问题也已经接上 AI</CardTitle>
+                <CardDescription>不是在首页聊天，而是在具体题目旁边直接问。</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                <div className="rounded-[24px] border border-white/8 bg-black/10 p-4 text-sm leading-7 text-slate-300">
+                  去题库页选题后，每道题卡下面都有“问这题”；练习页当前题也能直接追问。AI 会结合题目答案和项目源码来回答。
+                </div>
+                <Button asChild>
+                  <Link href="/library">
+                    <MessageCircleQuestion className="size-4" />
+                    直接去试
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </>
