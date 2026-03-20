@@ -398,6 +398,194 @@
       .stage-intro strong, .qa-content strong, .footer-note strong {
         color: var(--text);
       }
+      /* ── 行内批注 ── */
+      .ann-highlight {
+        background: rgba(255, 213, 79, .28);
+        border-bottom: 2px solid rgba(176, 133, 32, .5);
+        cursor: pointer;
+        position: relative;
+        border-radius: 3px;
+        padding: 0 1px;
+      }
+      .ann-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        margin-left: 2px;
+        border-radius: 999px;
+        background: #b08520;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        vertical-align: super;
+        line-height: 1;
+        transition: 180ms ease;
+      }
+      .ann-badge:hover { background: #8c6a18; transform: scale(1.15); }
+      /* 批注弹出面板 */
+      .ann-popover {
+        position: fixed;
+        z-index: 55;
+        width: min(380px, calc(100vw - 32px));
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,245,238,.98));
+        box-shadow: var(--shadow);
+        display: none;
+      }
+      .ann-popover.open { display: block; }
+      .ann-popover-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .ann-popover-label { font-size: 13px; font-weight: 600; color: #b08520; }
+      .ann-popover-actions { display: flex; gap: 6px; }
+      .ann-popover-actions button {
+        min-height: 30px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255,255,255,.7);
+        color: var(--text-soft);
+        font-size: 12px;
+        cursor: pointer;
+        transition: 180ms ease;
+      }
+      .ann-popover-actions button:hover { border-color: #a59b86; background: #fff; }
+      .ann-popover-actions button.danger { color: #c0392b; }
+      .ann-popover-actions button.danger:hover { border-color: rgba(192,57,43,.3); background: rgba(192,57,43,.06); }
+      .ann-popover-text {
+        font-size: 12px;
+        color: var(--text-soft);
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 213, 79, .12);
+        border: 1px solid rgba(176, 133, 32, .12);
+        line-height: 1.6;
+        word-break: break-word;
+      }
+      .ann-popover-input {
+        width: 100%;
+        min-height: 64px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255,255,255,.9);
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: vertical;
+        outline: none;
+      }
+      .ann-popover-input:focus {
+        border-color: rgba(176, 133, 32, .35);
+        box-shadow: 0 0 0 3px rgba(176, 133, 32, .08);
+      }
+      /* 选中文字后浮出的工具栏 */
+      .ann-toolbar {
+        position: fixed;
+        z-index: 56;
+        display: none;
+        padding: 0;
+      }
+      .ann-toolbar.open { display: block; }
+      .ann-toolbar-btn {
+        min-height: 36px;
+        padding: 0 14px;
+        border: 1px solid rgba(176,133,32,.3);
+        border-radius: 999px;
+        background: linear-gradient(180deg, #fffdf5, #faf5e4);
+        color: #8c6a18;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(18,20,23,.12);
+        transition: 180ms ease;
+        white-space: nowrap;
+      }
+      .ann-toolbar-btn:hover { background: #fff8dc; border-color: rgba(176,133,32,.5); }
+      /* ── AI 消息放大按钮 ── */
+      .ai-message.assistant {
+        position: relative;
+      }
+      .ai-expand-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255,255,255,.7);
+        color: var(--text-soft);
+        cursor: pointer;
+        transition: 180ms ease;
+        opacity: 0;
+      }
+      .ai-message.assistant:hover .ai-expand-btn { opacity: 1; }
+      .ai-expand-btn:hover {
+        border-color: rgba(20,86,255,.22);
+        background: rgba(20,86,255,.08);
+        color: var(--brand);
+      }
+      /* ── AI 全屏查看 overlay ── */
+      .ai-expand-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(18,20,23,.4);
+        backdrop-filter: blur(10px);
+        z-index: 50;
+      }
+      .ai-expand-overlay.open { display: flex; }
+      .ai-expand-panel {
+        width: min(860px, 100%);
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,245,238,.98));
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .ai-expand-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--line);
+      }
+      .ai-expand-header-title {
+        font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -.02em;
+      }
+      .ai-expand-body {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 22px 26px;
+        line-height: 1.9;
+      }
+      @media (max-width: 720px) {
+        .ai-expand-overlay { padding: 0; }
+        .ai-expand-panel { width: 100%; max-height: 100dvh; border-radius: 24px 24px 0 0; }
+      }
       .empty-stage {
         padding: 18px;
         border: 1px dashed var(--line-strong);
@@ -687,6 +875,17 @@
       <section class="summary-strip" id="summaryStrip"></section>
       <main class="roadmap" id="roadmap"></main>
       <div class="footer-note">只有两种状态：<strong>记住</strong> / <strong>未记住</strong>。不做假的熟练度评级，不做假的准备度推断。什么时候你真的记住了，就点一下。</div>
+    </div>
+
+    <!-- AI 全屏查看 overlay -->
+    <div class="ai-expand-overlay" id="aiExpandOverlay">
+      <div class="ai-expand-panel">
+        <div class="ai-expand-header">
+          <span class="ai-expand-header-title">AI 回答详情</span>
+          <button class="ai-close" type="button" data-action="close-expand" aria-label="关闭">×</button>
+        </div>
+        <div class="ai-expand-body ai-markdown" id="aiExpandBody"></div>
+      </div>
     </div>
 
     <div class="ai-modal" id="aiModal" aria-hidden="true">
@@ -1313,7 +1512,7 @@
       }
 
       function loadState() {
-        const base = { remembered: {}, expanded: {}, hideRemembered: false };
+        const base = { remembered: {}, expanded: {}, hideRemembered: false, annotations: {} };
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) return base;
@@ -1322,6 +1521,7 @@
             remembered: parsed.remembered && typeof parsed.remembered === "object" ? parsed.remembered : {},
             expanded: parsed.expanded && typeof parsed.expanded === "object" ? parsed.expanded : {},
             hideRemembered: Boolean(parsed.hideRemembered),
+            annotations: parsed.annotations && typeof parsed.annotations === "object" ? parsed.annotations : {},
           };
         } catch {
           return base;
@@ -1459,10 +1659,10 @@
           return;
         }
 
-          aiThread.innerHTML = aiState.messages.map((message) => `
+          aiThread.innerHTML = aiState.messages.map((message, msgIndex) => `
             <div class="ai-message ${message.role}">
               ${message.role === "assistant"
-                ? renderMarkdown(message.content)
+                ? `<button class="ai-expand-btn" type="button" data-action="expand-ai-msg" data-msg-index="${msgIndex}" title="放大查看">⤢</button>${renderMarkdown(message.content)}`
                 : escapeHtml(message.content).replace(/\n/g, "<br />")}
             </div>
           `).join("");
@@ -1543,9 +1743,16 @@
             throw new Error(payload.error || "AI 暂时没有返回结果。");
           }
 
+          const answerContent = payload.answer || "AI 这次没有生成可用内容。";
           aiState.messages.push({
             role: "assistant",
-            content: payload.answer || "AI 这次没有生成可用内容。",
+            content: answerContent,
+          });
+
+          // 自动弹出全屏查看
+          requestAnimationFrame(() => {
+            document.getElementById("aiExpandBody").innerHTML = renderMarkdown(answerContent);
+            document.getElementById("aiExpandOverlay").classList.add("open");
           });
         } catch (error) {
           aiError.hidden = false;
@@ -1685,7 +1892,7 @@
                                     </button>
                                   </div>
                                 </div>
-                                <div class="qa-content">${item.html}</div>
+                                <div class="qa-content" data-annotation-item="${item.id}">${applyAnnotations(item.html, item.id)}</div>
                               </article>
                             `;
                           }).join("")
@@ -1776,6 +1983,189 @@
         if (action === "close-ai") closeAiModal();
         if (action === "ask-ai-chip") sendAiQuestion(target.dataset.prompt);
         if (action === "send-ai") sendAiQuestion();
+        if (action === "expand-ai-msg") {
+          const idx = parseInt(target.dataset.msgIndex, 10);
+          const msg = aiState.messages[idx];
+          if (msg && msg.role === "assistant") {
+            const overlay = document.getElementById("aiExpandOverlay");
+            document.getElementById("aiExpandBody").innerHTML = renderMarkdown(msg.content);
+            overlay.classList.add("open");
+          }
+        }
+        if (action === "close-expand") {
+          document.getElementById("aiExpandOverlay").classList.remove("open");
+        }
+      });
+
+      // ── 行内批注系统 ──
+      function applyAnnotations(html, itemId) {
+        const anns = state.annotations[itemId] || [];
+        if (!anns.length) return html;
+        let result = html;
+        anns.forEach((ann, idx) => {
+          const escaped = ann.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(${escaped})(?![^<]*>)`);
+          result = result.replace(regex, `<mark class="ann-highlight">$1<span class="ann-badge" data-action="show-ann" data-ann-item="${itemId}" data-ann-index="${idx}">${idx + 1}</span></mark>`);
+        });
+        return result;
+      }
+
+      // 选中文字浮出工具栏
+      const annToolbar = document.createElement("div");
+      annToolbar.className = "ann-toolbar";
+      annToolbar.innerHTML = `<button class="ann-toolbar-btn" type="button">📝 添加批注</button>`;
+      document.body.appendChild(annToolbar);
+
+      let pendingSelection = { text: "", itemId: "" };
+
+      document.addEventListener("mouseup", (event) => {
+        // 不在 popover / toolbar 内选中时才处理
+        if (event.target.closest(".ann-popover") || event.target.closest(".ann-toolbar")) return;
+
+        const sel = window.getSelection();
+        const text = (sel && sel.toString() || "").trim();
+        if (!text || text.length < 2) {
+          annToolbar.classList.remove("open");
+          return;
+        }
+
+        // 检查是否在 qa-content 内
+        const anchor = sel.anchorNode;
+        const contentEl = anchor && anchor.nodeType === 3
+          ? anchor.parentElement.closest("[data-annotation-item]")
+          : anchor && anchor.closest && anchor.closest("[data-annotation-item]");
+        if (!contentEl) {
+          annToolbar.classList.remove("open");
+          return;
+        }
+
+        pendingSelection = { text, itemId: contentEl.dataset.annotationItem };
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        annToolbar.style.left = `${rect.left + rect.width / 2 - 60}px`;
+        annToolbar.style.top = `${rect.top - 44}px`;
+        annToolbar.classList.add("open");
+      });
+
+      // 批注 popover
+      const annPopover = document.createElement("div");
+      annPopover.className = "ann-popover";
+      annPopover.innerHTML = `
+        <div class="ann-popover-header">
+          <span class="ann-popover-label">📝 批注</span>
+          <div class="ann-popover-actions">
+            <button type="button" data-ann-action="save">保存</button>
+            <button type="button" data-ann-action="delete" class="danger">删除</button>
+            <button type="button" data-ann-action="close">关闭</button>
+          </div>
+        </div>
+        <div class="ann-popover-text" id="annPopoverText"></div>
+        <textarea class="ann-popover-input" id="annPopoverInput" placeholder="写下你的批注..."></textarea>
+      `;
+      document.body.appendChild(annPopover);
+      let activeAnn = { itemId: "", index: -1 };
+
+      // 工具栏点击 → 添加批注
+      annToolbar.querySelector(".ann-toolbar-btn").addEventListener("click", () => {
+        if (!pendingSelection.text) return;
+        const { text, itemId } = pendingSelection;
+        if (!state.annotations[itemId]) state.annotations[itemId] = [];
+        state.annotations[itemId].push({ text, note: "", createdAt: new Date().toISOString() });
+        saveState();
+        annToolbar.classList.remove("open");
+        window.getSelection().removeAllRanges();
+        render();
+
+        // 显示 popover 让用户立刻写批注
+        requestAnimationFrame(() => {
+          const newIdx = state.annotations[itemId].length - 1;
+          showAnnPopover(itemId, newIdx);
+        });
+      });
+
+      function showAnnPopover(itemId, index) {
+        const anns = state.annotations[itemId] || [];
+        const ann = anns[index];
+        if (!ann) return;
+        activeAnn = { itemId, index };
+
+        document.getElementById("annPopoverText").textContent = `"${ann.text}"`;
+        document.getElementById("annPopoverInput").value = ann.note || "";
+
+        // 定位到对应 badge
+        const badge = document.querySelector(`[data-ann-item="${itemId}"][data-ann-index="${index}"]`);
+        if (badge) {
+          const rect = badge.getBoundingClientRect();
+          annPopover.style.left = `${Math.min(rect.right + 8, window.innerWidth - 400)}px`;
+          annPopover.style.top = `${rect.top - 20}px`;
+        }
+        annPopover.classList.add("open");
+        requestAnimationFrame(() => document.getElementById("annPopoverInput").focus());
+      }
+
+      // Popover 操作
+      annPopover.addEventListener("click", (event) => {
+        const btn = event.target.closest("[data-ann-action]");
+        if (!btn) return;
+        const action = btn.dataset.annAction;
+        const { itemId, index } = activeAnn;
+
+        if (action === "save") {
+          const anns = state.annotations[itemId];
+          if (anns && anns[index]) {
+            anns[index].note = document.getElementById("annPopoverInput").value;
+            saveState();
+          }
+          annPopover.classList.remove("open");
+        }
+        if (action === "delete") {
+          const anns = state.annotations[itemId];
+          if (anns) {
+            anns.splice(index, 1);
+            if (!anns.length) delete state.annotations[itemId];
+            saveState();
+            render();
+          }
+          annPopover.classList.remove("open");
+        }
+        if (action === "close") {
+          // 自动保存
+          const anns = state.annotations[itemId];
+          if (anns && anns[index]) {
+            anns[index].note = document.getElementById("annPopoverInput").value;
+            saveState();
+          }
+          annPopover.classList.remove("open");
+        }
+      });
+
+      // 点击 badge 显示 popover
+      document.addEventListener("click", (event) => {
+        const badge = event.target.closest("[data-action='show-ann']");
+        if (badge) {
+          event.stopPropagation();
+          showAnnPopover(badge.dataset.annItem, parseInt(badge.dataset.annIndex, 10));
+          return;
+        }
+        // 点击外部关闭 popover（但不在 popover 内部点击时）
+        if (!event.target.closest(".ann-popover") && !event.target.closest(".ann-toolbar")) {
+          if (annPopover.classList.contains("open")) {
+            // 自动保存
+            const { itemId, index } = activeAnn;
+            const anns = state.annotations[itemId];
+            if (anns && anns[index]) {
+              anns[index].note = document.getElementById("annPopoverInput").value;
+              saveState();
+            }
+            annPopover.classList.remove("open");
+          }
+        }
+      }, true);
+
+      // 关闭工具栏（点击其他地方）
+      document.addEventListener("mousedown", (event) => {
+        if (!event.target.closest(".ann-toolbar")) {
+          annToolbar.classList.remove("open");
+        }
       });
 
       aiModal.addEventListener("click", (event) => {
@@ -1784,9 +2174,21 @@
         }
       });
 
+      document.getElementById("aiExpandOverlay").addEventListener("click", (event) => {
+        if (event.target.id === "aiExpandOverlay") {
+          event.target.classList.remove("open");
+        }
+      });
+
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && aiState.item) {
-          closeAiModal();
+        if (event.key === "Escape") {
+          if (document.getElementById("aiExpandOverlay").classList.contains("open")) {
+            document.getElementById("aiExpandOverlay").classList.remove("open");
+            return;
+          }
+          if (aiState.item) {
+            closeAiModal();
+          }
         }
 
         if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && aiState.item) {

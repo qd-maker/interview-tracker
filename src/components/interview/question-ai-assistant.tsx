@@ -1,12 +1,18 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Bot, LoaderCircle, MessageCircleQuestion, Send, Sparkles } from "lucide-react"
+import { Bot, LoaderCircle, Maximize2, MessageCircleQuestion, Send, Sparkles } from "lucide-react"
 
 import { MarkdownContent } from "@/components/interview/markdown-content"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Sheet,
   SheetContent,
@@ -76,6 +82,7 @@ export function QuestionAiAssistant({
   const [messages, setMessages] = useState<AssistantMessage[]>([])
   const [isMobile, setIsMobile] = useState(false)
   const scrollEndRef = useRef<HTMLDivElement>(null)
+  const [expandedMessage, setExpandedMessage] = useState<AssistantMessage | null>(null)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)")
@@ -250,8 +257,8 @@ export function QuestionAiAssistant({
                           <Bot className="size-4" />
                         </div>
                         <div className="min-w-0 flex-1 space-y-3">
-                          <div className="rounded-[24px] border border-white/8 bg-black/20 px-4 py-4">
-                            <div className="flex flex-wrap items-center gap-2">
+                          <div className="relative rounded-[24px] border border-white/8 bg-black/20 px-4 py-4">
+                            <div className="flex flex-wrap items-center gap-2 pr-8">
                               <p className="text-sm font-medium text-white">项目感知 AI 助手</p>
                               {message.model ? (
                                 <Badge
@@ -262,6 +269,14 @@ export function QuestionAiAssistant({
                                 </Badge>
                               ) : null}
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedMessage(message)}
+                              className="absolute right-3 top-3 rounded-lg border border-white/8 bg-white/5 p-1.5 text-slate-400 transition hover:border-white/16 hover:bg-white/10 hover:text-white"
+                              title="放大查看"
+                            >
+                              <Maximize2 className="size-3.5" />
+                            </button>
                             <div className="mt-3">
                               <MarkdownContent>{message.content}</MarkdownContent>
                             </div>
@@ -364,6 +379,67 @@ export function QuestionAiAssistant({
           </div>
         </div>
       </SheetContent>
+
+      {/* ── 全屏查看 AI 回答 ── */}
+      <Dialog open={!!expandedMessage} onOpenChange={(v) => { if (!v) setExpandedMessage(null) }}>
+        <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col gap-0 overflow-hidden border-white/10 bg-[#07111d] p-0 text-white">
+          <DialogHeader className="shrink-0 border-b border-white/8 bg-black/10 px-5 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <DialogTitle className="text-white">AI 回答详情</DialogTitle>
+              {expandedMessage?.model ? (
+                <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
+                  {expandedMessage.model}
+                </Badge>
+              ) : null}
+            </div>
+          </DialogHeader>
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="space-y-6 p-5 lg:p-6">
+              <div>
+                <MarkdownContent>{expandedMessage?.content ?? ""}</MarkdownContent>
+              </div>
+
+              {expandedMessage?.references?.length ? (
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
+                    本轮命中的源码依据
+                  </p>
+                  {expandedMessage.references.map((reference) => (
+                    <div
+                      key={reference.id}
+                      className="rounded-[20px] border border-white/8 bg-black/10 px-4 py-4"
+                    >
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className="bg-emerald-400/12 text-emerald-100">
+                          {reference.projectLabel}
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="border-white/10 bg-white/5 text-slate-300"
+                        >
+                          {formatReferenceLabel(reference)}
+                        </Badge>
+                      </div>
+                      <p className="mt-3 text-xs leading-6 text-slate-400">
+                        {reference.relevance}
+                      </p>
+                      <pre className="mt-3 whitespace-pre-wrap rounded-2xl border border-white/8 bg-[#0a1522] px-3 py-3 text-xs leading-6 text-slate-300">
+                        {reference.snippet}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {expandedMessage?.warnings?.length ? (
+                <div className="rounded-[20px] border border-amber-300/15 bg-amber-300/8 px-4 py-3 text-sm leading-6 text-amber-100">
+                  {expandedMessage.warnings.join(" ")}
+                </div>
+              ) : null}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   )
 }

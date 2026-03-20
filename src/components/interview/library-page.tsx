@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Download, FileUp, Search, Sparkles, Star } from "lucide-react"
+import { Download, FileUp, Search, Sparkles, Star, StickyNote } from "lucide-react"
 
 import { MarkdownContent } from "@/components/interview/markdown-content"
 
@@ -391,6 +391,25 @@ export function LibraryPage() {
                 )}
               </div>
 
+              {/* ━━ 个人批注与记忆点 ━━ */}
+              <div className="rounded-[24px] border border-amber-300/12 bg-amber-400/5 p-4">
+                <div className="flex items-center gap-2">
+                  <StickyNote className="size-4 text-amber-300/70" />
+                  <p className="text-sm font-medium text-amber-100">个人批注与记忆点</p>
+                </div>
+                <p className="mt-1 text-xs leading-5 text-slate-400">
+                  看完答案后，用自己的话记一句最关键的点，或者容易被追问的地方。
+                </p>
+                <Textarea
+                  value={selectedQuestion.notes}
+                  onChange={(event) =>
+                    updateQuestion(selectedQuestion.id, { notes: event.target.value })
+                  }
+                  placeholder="例如：这题重点讲字段级引用 + 召回率从 72% 提到 91%，别忘了提 Chunk overlap 策略。"
+                  className="mt-3 min-h-28 border-amber-300/10 bg-black/20 text-white placeholder:text-slate-500"
+                />
+              </div>
+
               <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
                 <div className="space-y-4">
                   <div className="rounded-[24px] border border-white/8 bg-black/10 p-4">
@@ -456,17 +475,7 @@ export function LibraryPage() {
                       </label>
                     </div>
 
-                    <div className="mt-4 space-y-2">
-                      <label className="text-xs uppercase tracking-[0.24em] text-slate-400">个人备注</label>
-                      <Textarea
-                        value={selectedQuestion.notes}
-                        onChange={(event) =>
-                          updateQuestion(selectedQuestion.id, { notes: event.target.value })
-                        }
-                        placeholder="记录一句更像自己口语的表达，或者容易被追问的点。"
-                        className="min-h-32 border-white/10 bg-black/10 text-white placeholder:text-slate-500"
-                      />
-                    </div>
+
 
                     <div className="mt-4 flex flex-wrap gap-3">
                       <Button onClick={handleStartModulePractice}>
