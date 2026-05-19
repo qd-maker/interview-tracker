@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interview Tracker
 
-## Getting Started
+面试题库 + AI 项目源码问答工具，基于 Next.js 构建。
 
-First, run the development server:
+## 本地启动
+
+1. 克隆仓库
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/qd-maker/interview-tracker.git
+cd interview-tracker
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 准备环境变量
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+编辑 `.env.local`：
 
-## Learn More
+```env
+OPENAI_API_KEY=sk-your-api-key-here
+OPENAI_BASE_URL=https://yunwu.ai/v1
+OPENAI_MODEL=gpt-5-mini
 
-To learn more about Next.js, take a look at the following resources:
+# 如果 insurance-rag / Quorum 与本仓库同级目录，可直接沿用默认值
+INTERVIEW_SOURCE_INSURANCE_RAG_ROOT=../insurance-rag
+INTERVIEW_SOURCE_QUORUM_ROOT=../Quorum
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+说明：
+- `OPENAI_API_KEY` 必填，否则“项目源码问答”不可用。
+- `OPENAI_BASE_URL` 默认为当前使用的 OpenAI 兼容中转站。
+- 如果你的 `insurance-rag` / `Quorum` 不在同级目录，改成你本机实际路径。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. 安装依赖并启动
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+打开 `http://localhost:3000`。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 关联仓库建议目录结构
+
+为了让源码问答开箱即用，建议把 3 个仓库放在同一个父目录下：
+
+```text
+workspace/
+├── interview-tracker/
+├── insurance-rag/
+└── Quorum/
+```
+
+这样 `.env.example` 里的默认路径就能直接工作。

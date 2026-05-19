@@ -41,7 +41,7 @@ const PROJECTS: Record<SourceProjectId, SourceProjectDefinition> = {
     label: "insurance-rag",
     candidateRoots: [
       process.env.INTERVIEW_SOURCE_INSURANCE_RAG_ROOT ?? "",
-      "E:/code/agent-skillsd",
+      "../insurance-rag",
     ],
     includeFiles: [
       "config/site-data.ts",
@@ -52,7 +52,7 @@ const PROJECTS: Record<SourceProjectId, SourceProjectDefinition> = {
   quorum: {
     id: "quorum",
     label: "Quorum",
-    candidateRoots: [process.env.INTERVIEW_SOURCE_QUORUM_ROOT ?? "", "E:/code/claude/Quorum"],
+    candidateRoots: [process.env.INTERVIEW_SOURCE_QUORUM_ROOT ?? "", "../Quorum"],
     includeFiles: [
       "README.md",
       "backend/main.py",
